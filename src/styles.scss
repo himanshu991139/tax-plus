@@ -1,0 +1,162 @@
+/* ==========================================================================
+   TaxPulse GST - Premium Modern SaaS Design System
+   ========================================================================== */
+
+/* Prebuilt Libraries */
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+:root {
+  /* Brand Palette */
+  --primary-brand: #3b82f6;
+  --primary-brand-dark: #1d4ed8;
+  --primary-indigo: #4f46e5;
+  --primary-indigo-dark: #4338ca;
+  --header-bg: #0f172a; /* Slate 900 */
+  --sidebar-bg: #ffffff;
+  --app-bg: #f8fafc;
+  --surface-card: #ffffff;
+  
+  /* Text */
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-subtle: #94a3b8;
+
+  /* Borders */
+  --border-subtle: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --border-focus: #6366f1;
+
+  /* Accents */
+  --accent-amber: #d97706;
+  --accent-amber-light: #fef3c7;
+  --accent-emerald: #059669;
+  --accent-rose: #e11d48;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--app-bg);
+  color: var(--text-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* App Main Layout Grid */
+.app-container {
+  display: flex;
+  min-height: calc(100vh - 64px);
+}
+
+.main-content-area {
+  flex: 1;
+  padding: 28px 36px 60px;
+  max-width: 1600px;
+  overflow-x: hidden;
+}
+
+/* Premium Buttons */
+.btn-brand-indigo {
+  background: linear-gradient(135deg, #4f46e5, #4338ca) !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
+  transition: all 0.15s ease-in-out;
+
+  &:hover {
+    background: linear-gradient(135deg, #4338ca, #3730a3) !important;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+    transform: translateY(-1px);
+  }
+}
+
+.btn-brand-amber {
+  background: linear-gradient(135deg, #d97706, #b45309) !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(217, 119, 6, 0.25);
+  transition: all 0.15s ease-in-out;
+
+  &:hover {
+    background: linear-gradient(135deg, #b45309, #92400e) !important;
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.35);
+    transform: translateY(-1px);
+  }
+}
+
+.btn-outline-subtle {
+  background: #ffffff !important;
+  border: 1px solid var(--border-strong) !important;
+  color: var(--text-main) !important;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: all 0.15s ease-in-out;
+
+  &:hover {
+    background: #f8fafc !important;
+    border-color: #94a3b8 !important;
+  }
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 16px;
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Monospace font */
+.font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}

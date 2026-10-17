@@ -1,0 +1,13 @@
+<app-header></app-header>
+<div class="app-container">
+  <app-sidebar></app-sidebar>
+  <main class="main-content-area">
+    <router-outlet></router-outlet>
+  </main>
+</div>
+
+<!-- Root-level modals (accessible from header/sidebar on any route) -->
+<app-constant-config-modal></app-constant-config-modal>
+<app-client-info-modal></app-client-info-modal>
+<app-support-widget></app-support-widget>
+<app-toast></app-toast>
