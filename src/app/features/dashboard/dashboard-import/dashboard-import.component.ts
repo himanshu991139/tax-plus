@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ClientHeaderComponent } from '../client-header/client-header.component';
-import { PlatformFilterComponent } from '../platform-filter/platform-filter.component';
 import { PlatformGridComponent } from '../platform-grid/platform-grid.component';
 import { UploadModalComponent } from '../../modals/upload-modal/upload-modal.component';
 import { StatementModalComponent } from '../../modals/statement-modal/statement-modal.component';
@@ -13,7 +12,6 @@ import { SwitchClientModalComponent } from '../../modals/switch-client-modal/swi
   imports: [
     CommonModule,
     ClientHeaderComponent,
-    PlatformFilterComponent,
     PlatformGridComponent,
     UploadModalComponent,
     StatementModalComponent,
@@ -24,8 +22,9 @@ import { SwitchClientModalComponent } from '../../modals/switch-client-modal/swi
       <!-- Client Header Bar -->
       <app-client-header></app-client-header>
 
-      <!-- Platform Search & Filters -->
+      <!-- Platform Search & Filters - Hidden
       <app-platform-filter></app-platform-filter>
+      -->
 
       <!-- Platform Cards Grid -->
       <app-platform-grid></app-platform-grid>

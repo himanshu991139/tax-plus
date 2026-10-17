@@ -70,7 +70,7 @@ body {
 /* App Main Layout Grid */
 .app-container {
   display: flex;
-  min-height: calc(100vh - 64px);
+  height: calc(100vh - 64px);
 }
 
 .main-content-area {
@@ -78,6 +78,8 @@ body {
   padding: 28px 36px 60px;
   max-width: 1600px;
   overflow-x: hidden;
+  overflow-y: auto;
+  height: 100%;
 }
 
 /* Premium Buttons */

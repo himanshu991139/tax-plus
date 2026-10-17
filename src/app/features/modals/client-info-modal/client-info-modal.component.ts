@@ -52,13 +52,7 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
                   <span class="detail-val font-mono fw-bold">{{ p.gstin }}</span>
                 </div>
 
-                <div class="detail-row">
-                  <span class="detail-label d-flex align-items-center gap-2">
-                    <app-icon name="calendar" [size]="16" class="text-secondary"></app-icon>
-                    <span>Type Of Filing</span>
-                  </span>
-                  <span class="detail-val">{{ p.typeOfFiling }}</span>
-                </div>
+
               </div>
 
               <!-- Month and Year Selection -->

@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClientStateService } from '../../../core/services/client-state.service';
+import { GstApiService } from '../../../core/services/gst-api.service';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { GST_STATE_MAP } from '../../../core/utils/state-codes';
 
@@ -34,24 +35,14 @@ import { GST_STATE_MAP } from '../../../core/utils/state-codes';
                 <app-icon name="id-card" [size]="15" class="text-primary"></app-icon>
                 <span>GSTIN :</span>
               </label>
-              <div class="input-group">
-                <input
-                  type="text"
-                  class="form-control font-mono text-uppercase"
-                  placeholder="ENTER GSTIN OF THE CLIENT (E.G. 09AAACO4007A1Z3)"
-                  maxlength="15"
-                  [(ngModel)]="gstin"
-                  (ngModelChange)="onGstinChange($event)"
-                />
-                <button
-                  type="button"
-                  class="btn btn-outline-primary d-flex align-items-center gap-1"
-                  (click)="validateGstin()"
-                >
-                  <app-icon name="search" [size]="14"></app-icon>
-                  <span>Validate GSTIN</span>
-                </button>
-              </div>
+              <input
+                type="text"
+                class="form-control font-mono text-uppercase"
+                placeholder="ENTER GSTIN OF THE CLIENT (E.G. 09AAACO4007A1Z3)"
+                maxlength="15"
+                [(ngModel)]="gstin"
+                (ngModelChange)="onGstinChange($event)"
+              />
               <div class="form-text text-danger small mt-1">
                 Please ensure the GSTIN is entered correctly. Once added, it cannot be modified.
               </div>
@@ -90,38 +81,8 @@ import { GST_STATE_MAP } from '../../../core/utils/state-codes';
               />
             </div>
 
-            <!-- Type Of Filing -->
-            <div class="mb-3">
-              <label class="form-label fw-bold small text-dark d-flex align-items-center gap-1">
-                <app-icon name="calendar" [size]="15" class="text-primary"></app-icon>
-                <span>Type Of Filing :</span>
-              </label>
-              <div class="d-flex align-items-center gap-4 mt-1">
-                <div class="form-check">
-                  <input
-                    class="form-check-input"
-                    type="radio"
-                    name="filingType"
-                    id="typeMonthly"
-                    value="Monthly"
-                    [(ngModel)]="typeOfFiling"
-                  />
-                  <label class="form-check-label fw-semibold" for="typeMonthly">Monthly</label>
-                </div>
-                <div class="form-check d-flex align-items-center gap-2">
-                  <input
-                    class="form-check-input"
-                    type="radio"
-                    name="filingType"
-                    id="typeQuarterly"
-                    value="Quarterly"
-                    [(ngModel)]="typeOfFiling"
-                  />
-                  <label class="form-check-label fw-semibold text-muted" for="typeQuarterly">Quarterly</label>
-                  <span class="badge bg-warning text-dark border">Upgrade Required</span>
-                </div>
-              </div>
-            </div>
+
+            
 
             <!-- GST Username -->
             <div class="mb-3">
@@ -129,54 +90,15 @@ import { GST_STATE_MAP } from '../../../core/utils/state-codes';
                 <app-icon name="user" [size]="15" class="text-primary"></app-icon>
                 <span>GST Username :</span>
               </label>
-              <div class="input-group">
-                <input
-                  type="text"
-                  class="form-control"
-                  placeholder="Enter GST Username"
-                  [(ngModel)]="gstUsername"
-                />
-                <button
-                  type="button"
-                  class="btn btn-outline-secondary"
-                  (click)="authenticateUsername()"
-                >
-                  Authenticate
-                </button>
-              </div>
-              <div class="form-text text-muted small mt-1">
-                ⓘ GST username authentication is important for TCS comparison. Please enter correct username
-              </div>
-              <div class="alert alert-warning py-2 px-3 small mt-2 mb-0 d-flex align-items-center gap-2">
-                <app-icon name="alert" [size]="16" class="text-warning"></app-icon>
-                <span>
-                  <strong>Important:</strong> Please ensure that <strong>API Access</strong> is enabled for your username under your GST Portal settings.
-                </span>
-              </div>
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Enter GST Username"
+                [(ngModel)]="gstUsername"
+              />
+             
             </div>
 
-            <!-- GST Password (optional) -->
-            <div class="mb-3">
-              <label class="form-label fw-bold small text-dark d-flex align-items-center gap-1">
-                <app-icon name="settings" [size]="15" class="text-primary"></app-icon>
-                <span>GST Password (optional) :</span>
-              </label>
-              <div class="input-group">
-                <input
-                  [type]="showPassword() ? 'text' : 'password'"
-                  class="form-control"
-                  placeholder="Enter GST Password (optional)"
-                  [(ngModel)]="gstPassword"
-                />
-                <button
-                  type="button"
-                  class="btn btn-outline-secondary"
-                  (click)="showPassword.update(v => !v)"
-                >
-                  <app-icon [name]="showPassword() ? 'eye' : 'eye'" [size]="15"></app-icon>
-                </button>
-              </div>
-            </div>
           </div>
 
           <!-- Modal Footer -->
@@ -192,9 +114,9 @@ import { GST_STATE_MAP } from '../../../core/utils/state-codes';
               type="button"
               class="btn btn-brand-indigo"
               (click)="saveProfile()"
-              [disabled]="!gstin || !companyName"
+              [disabled]="!gstin || !companyName || isSubmitting()"
             >
-              Save Profile
+              {{ isSubmitting() ? 'Saving...' : 'Save Profile' }}
             </button>
           </div>
         </div>
@@ -279,14 +201,15 @@ import { GST_STATE_MAP } from '../../../core/utils/state-codes';
 })
 export class AddProfileModalComponent {
   readonly state = inject(ClientStateService);
+  private readonly gstApi = inject(GstApiService);
 
   gstin = '';
   companyName = '';
   ownerName = '';
-  typeOfFiling: 'Monthly' | 'Quarterly' = 'Monthly';
   gstUsername = '';
   gstPassword = '';
 
+  readonly isSubmitting = signal<boolean>(false);
   readonly showPassword = signal<boolean>(false);
   readonly detectedState = signal<string | null>(null);
   readonly stateCode = signal<string>('09');
@@ -306,58 +229,43 @@ export class AddProfileModalComponent {
     }
   }
 
-  validateGstin(): void {
-    const cleanGstin = this.gstin.trim().toUpperCase();
-    if (cleanGstin.length !== 15) {
-      this.state.showToast('Please enter a valid 15-character GSTIN.', 'warning');
-      return;
-    }
-    const code = cleanGstin.substring(0, 2);
-    const stateName = GST_STATE_MAP[code];
-    if (stateName) {
-      this.detectedState.set(stateName);
-      this.stateCode.set(code);
-      this.state.showToast(`GSTIN format is valid! State: ${stateName}`, 'success');
-    } else {
-      this.state.showToast('Invalid State Code prefix in GSTIN.', 'error');
-    }
-  }
-
-  authenticateUsername(): void {
-    if (!this.gstUsername.trim()) {
-      this.state.showToast('Please enter a GST username to authenticate.', 'warning');
-      return;
-    }
-    this.state.showToast(`Username "${this.gstUsername}" authenticated with GST portal!`, 'success');
-  }
-
   saveProfile(): void {
-    if (!this.gstin.trim() || !this.companyName.trim()) {
+    const cleanGstin = this.gstin.trim().toUpperCase();
+    const cleanCompanyName = this.companyName.trim();
+    const cleanOwnerName = this.ownerName.trim() || cleanCompanyName;
+
+    if (!cleanGstin || !cleanCompanyName) {
       this.state.showToast('Company Name and GSTIN are required.', 'error');
       return;
     }
 
-    const cleanGstin = this.gstin.trim().toUpperCase();
-    const code = cleanGstin.substring(0, 2) || '09';
+    if (cleanGstin.length !== 15) {
+      this.state.showToast('GSTIN must be 15 alphanumeric characters.', 'warning');
+      return;
+    }
 
-    this.state.addProfile({
-      companyName: this.companyName.trim(),
-      ownerName: (this.ownerName.trim() || this.companyName.trim()),
+    this.isSubmitting.set(true);
+
+    this.gstApi.createCompany({
+      companyName: cleanCompanyName,
+      ownerName: cleanOwnerName,
       gstin: cleanGstin,
-      sellerStateCode: code,
-      typeOfFiling: this.typeOfFiling,
-      gstr1Status: 'No',
-      gstr3bStatus: 'No',
-      username: this.gstUsername.trim(),
-      password: this.gstPassword,
-      period: 'September 2026',
-      periodCode: '092026',
-      year: '2026',
-      month: 'September',
+    }).subscribe({
+      next: (created) => {
+        this.isSubmitting.set(false);
+        this.state.loadProfilesFromBackend();
+        this.state.showToast(`GST Profile "${created.companyName}" created successfully!`, 'success');
+        this.state.closeAddProfileModal();
+        this.resetForm();
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        this.state.showToast(err.message || 'Failed to create profile.', 'error');
+      },
     });
+  }
 
-    this.state.closeAddProfileModal();
-    // Reset form
+  private resetForm(): void {
     this.gstin = '';
     this.companyName = '';
     this.ownerName = '';

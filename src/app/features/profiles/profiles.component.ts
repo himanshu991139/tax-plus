@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -64,29 +64,14 @@ import { ConstantConfigModalComponent } from '../modals/constant-config-modal/co
             </div>
 
             <div class="meta-item">
-              <div class="meta-icon"><app-icon name="calendar" [size]="18"></app-icon></div>
+              <div class="meta-icon"><app-icon name="clock" [size]="18"></app-icon></div>
               <div>
-                <div class="meta-lbl">Period</div>
-                <div class="meta-val">{{ active.period }}</div>
-              </div>
-            </div>
-
-            <div class="meta-item">
-              <div class="meta-icon"><app-icon name="file-text" [size]="18"></app-icon></div>
-              <div>
-                <div class="meta-lbl">Type</div>
-                <div class="meta-val">{{ active.typeOfFiling }}</div>
-              </div>
-            </div>
-
-            <div class="meta-item">
-              <div class="meta-icon"><app-icon name="calendar" [size]="18"></app-icon></div>
-              <div>
-                <div class="meta-lbl">Year</div>
-                <div class="meta-val">{{ active.year }}</div>
+                <div class="meta-lbl">Created On</div>
+                <div class="meta-val">{{ active.createdOn }}</div>
               </div>
             </div>
           </div>
+
 
           <!-- Proceed to Import Data Action Button -->
           <button
@@ -99,6 +84,18 @@ import { ConstantConfigModalComponent } from '../modals/constant-config-modal/co
           </button>
         </div>
       }
+
+      <!-- Add GST Profile Button -->
+      <div class="add-profile-row mb-4">
+        <button
+          type="button"
+          class="btn btn-add-profile"
+          (click)="state.openAddProfileModal()"
+        >
+          <app-icon name="building" [size]="14"></app-icon>
+          <span>Add GST Profile</span>
+        </button>
+      </div>
 
       <!-- Filter and Search Row -->
       <div class="search-filter-card mb-4">
@@ -115,18 +112,6 @@ import { ConstantConfigModalComponent } from '../modals/constant-config-modal/co
 
         <!-- Filter Controls - Commented Out
         <div class="filter-controls-group">
-          <div class="select-wrapper">
-            <span class="select-label">Filing:</span>
-            <select
-              class="filter-select"
-              [ngModel]="state.profileFilingFilter()"
-              (ngModelChange)="state.profileFilingFilter.set($event)"
-            >
-              <option value="All">All</option>
-              <option value="Monthly">Monthly</option>
-              <option value="Quarterly">Quarterly</option>
-            </select>
-          </div>
 
           <div class="select-wrapper">
             <span class="select-label">GSTR-1:</span>
@@ -174,11 +159,6 @@ import { ConstantConfigModalComponent } from '../modals/constant-config-modal/co
                 <th>COMPANY NAME</th>
                 <th>OWNER NAME</th>
                 <th>GSTIN</th>
-                <th>TYPE OF FILING</th>
-                <th class="text-center">GSTR-1 ⇅</th>
-                <th class="text-center">GSTR-3B ⇅</th>
-                <th class="text-center">AUG 26</th>
-                <th class="text-center">SEPT 26</th>
                 <th class="text-end">ACTIONS</th>
               </tr>
             </thead>
@@ -190,61 +170,35 @@ import { ConstantConfigModalComponent } from '../modals/constant-config-modal/co
                   <td class="fw-bold text-dark">{{ profile.companyName }}</td>
                   <td class="text-dark">{{ profile.ownerName }}</td>
                   <td class="font-mono text-primary fw-semibold">{{ profile.gstin }}</td>
-                  <td>
-                    <span class="badge badge-filing">{{ profile.typeOfFiling }}</span>
-                  </td>
-                  <td class="text-center">
-                    <span class="badge" [class.badge-status-no]="profile.gstr1Status === 'No'" [class.badge-status-yes]="profile.gstr1Status === 'Yes'">
-                      {{ profile.gstr1Status }}
-                    </span>
-                  </td>
-                  <td class="text-center">
-                    <span class="badge" [class.badge-status-no]="profile.gstr3bStatus === 'No'" [class.badge-status-yes]="profile.gstr3bStatus === 'Yes'">
-                      {{ profile.gstr3bStatus }}
-                    </span>
-                  </td>
-                  <td class="text-center">
-                    @if (profile.history?.aug26 === 'filed') {
-                      <span class="status-indicator-circle success">✓</span>
-                    } @else {
-                      <span class="status-indicator-circle pending">✕</span>
-                    }
-                  </td>
-                  <td class="text-center">
-                    @if (profile.history?.sept26 === 'filed') {
-                      <span class="status-indicator-circle success">✓</span>
-                    } @else {
-                      <span class="status-indicator-circle pending">✕</span>
-                    }
-                  </td>
                   <td class="text-end">
-                    <div class="d-inline-flex align-items-center gap-1">
-                      <!-- Select Profile & Proceed -->
+                    <div class="d-inline-flex align-items-center gap-2">
+                      <!-- File GST Button -->
                       <button
                         type="button"
-                        class="btn-action-circle select-btn"
-                        [class.active]="state.activeProfile()?.id === profile.id"
+                        class="btn-file-gst"
                         (click)="proceedToImport(profile)"
-                        title="Proceed to Import Data"
+                        title="File GST for this client"
                       >
-                        <app-icon name="chevron-down" [size]="14" customClass="rotate-right"></app-icon>
+                        <app-icon name="cloud-upload" [size]="14"></app-icon>
+                        <span>File GST</span>
                       </button>
 
-                      <!-- Delete Profile -->
+                      <!-- Delete Profile Button -->
                       <button
                         type="button"
-                        class="btn-action-circle delete-btn"
+                        class="btn-delete-profile"
                         (click)="deleteProfile(profile)"
                         title="Delete Profile"
                       >
                         <app-icon name="x" [size]="14"></app-icon>
+                        <span>Delete</span>
                       </button>
                     </div>
                   </td>
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="11" class="text-center py-5 text-muted">
+                  <td colspan="6" class="text-center py-5 text-muted">
                     No GST profiles found matching your search.
                   </td>
                 </tr>
@@ -424,6 +378,28 @@ import { ConstantConfigModalComponent } from '../modals/constant-config-modal/co
         }
       }
 
+      .btn-add-profile {
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 13px;
+        border: none;
+        border-radius: 8px;
+        padding: 9px 18px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+        box-shadow: 0 4px 10px rgba(79, 70, 229, 0.25);
+        transition: all 0.15s;
+
+        &:hover {
+          background: linear-gradient(135deg, #4338ca, #4f46e5);
+          box-shadow: 0 6px 14px rgba(79, 70, 229, 0.35);
+          transform: translateY(-1px);
+        }
+      }
+
       .filter-controls-group {
         display: flex;
         align-items: center;
@@ -539,53 +515,64 @@ import { ConstantConfigModalComponent } from '../modals/constant-config-modal/co
         }
       }
 
-      .btn-action-circle {
-        width: 32px;
-        height: 32px;
+      .btn-file-gst {
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        color: #ffffff;
+        border: none;
         border-radius: 6px;
-        border: 1px solid #cbd5e1;
-        background: #ffffff;
-        color: #475569;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
         display: inline-flex;
         align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.15s;
+        gap: 6px;
+        box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+        transition: all 0.15s ease-in-out;
+        white-space: nowrap;
 
         &:hover {
-          background: #f1f5f9;
+          background: linear-gradient(135deg, #4338ca, #4f46e5);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 8px rgba(79, 70, 229, 0.3);
         }
+      }
 
-        &.select-btn {
-          color: #059669;
-          border-color: #a7f3d0;
-          &:hover,
-          &.active {
-            background: #059669;
-            color: #ffffff;
-            border-color: #059669;
-          }
-        }
+      .btn-delete-profile {
+        background: #ffffff;
+        color: #dc2626;
+        border: 1px solid #fca5a5;
+        border-radius: 6px;
+        padding: 5px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        transition: all 0.15s ease-in-out;
+        white-space: nowrap;
 
-        &.delete-btn {
-          &:hover {
-            color: #dc2626;
-            border-color: #fca5a5;
-            background: #fef2f2;
-          }
+        &:hover {
+          background: #fee2e2;
+          border-color: #ef4444;
+          color: #b91c1c;
         }
       }
     `,
   ],
 })
-export class ProfilesComponent {
+export class ProfilesComponent implements OnInit {
   readonly state = inject(ClientStateService);
   private readonly router = inject(Router);
+
+  ngOnInit(): void {
+    this.state.loadProfilesFromBackend();
+  }
 
   hasActiveFilters(): boolean {
     return (
       !!this.state.profileSearch() ||
-      this.state.profileFilingFilter() !== 'All' ||
       this.state.profileGstr1Filter() !== 'All' ||
       this.state.profileGstr3bFilter() !== 'All'
     );

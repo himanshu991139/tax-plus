@@ -66,7 +66,10 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
         flex-direction: column;
         justify-content: space-between;
         padding: 20px 16px;
-        min-height: calc(100vh - 64px);
+        height: calc(100vh - 64px);
+        position: sticky;
+        top: 64px;
+        overflow-y: auto;
       }
 
       .workspace-card {

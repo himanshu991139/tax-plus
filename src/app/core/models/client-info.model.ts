@@ -5,10 +5,24 @@ export interface ClientInfo {
   gstin: string;
   period: string; // e.g. "September 2026"
   periodCode: string; // e.g. "092026"
-  type: string; // "Monthly" | "Quarterly"
+  type?: string; // "Monthly" | "Quarterly"
   year: string; // "2026"
   sellerStateCode: string; // "09"
   username?: string;
+}
+
+export interface CompanyEntity {
+  id: number;
+  companyName: string;
+  ownerName: string;
+  gstin: string;
+  createdAt?: string;
+}
+
+export interface CompanyDto {
+  companyName: string;
+  ownerName: string;
+  gstin: string;
 }
 
 export interface GstProfile {
@@ -19,7 +33,6 @@ export interface GstProfile {
   ownerName: string;
   gstin: string;
   sellerStateCode: string;
-  typeOfFiling: 'Monthly' | 'Quarterly';
   gstr1Status: 'Yes' | 'No';
   gstr3bStatus: 'Yes' | 'No';
   username?: string;
@@ -63,7 +76,6 @@ export const INITIAL_PROFILES: GstProfile[] = [
     ownerName: 'harsh',
     gstin: '09OYVPS2177B1ZJ',
     sellerStateCode: '09',
-    typeOfFiling: 'Monthly',
     gstr1Status: 'No',
     gstr3bStatus: 'No',
     username: 'harsh_seller',
@@ -81,7 +93,6 @@ export const INITIAL_PROFILES: GstProfile[] = [
     ownerName: 'dsdivine13',
     gstin: '09OYVPS2177B2ZI',
     sellerStateCode: '09',
-    typeOfFiling: 'Monthly',
     gstr1Status: 'Yes',
     gstr3bStatus: 'No',
     username: 'dsdivine_gst',
@@ -99,7 +110,6 @@ export const INITIAL_PROFILES: GstProfile[] = [
     ownerName: 'xcleani',
     gstin: '09CDQPT2928D1Z3',
     sellerStateCode: '09',
-    typeOfFiling: 'Monthly',
     gstr1Status: 'No',
     gstr3bStatus: 'No',
     username: 'xcleani_tax',

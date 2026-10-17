@@ -29,19 +29,65 @@ export class ClientStateService {
   readonly profiles = signal<GstProfile[]>(INITIAL_PROFILES);
   readonly activeProfile = signal<GstProfile | null>(INITIAL_PROFILES[1]); // Default to dsdivine13
 
+  constructor() {
+    this.loadProfilesFromBackend();
+  }
+
+  loadProfilesFromBackend(): void {
+    this.gstApi.getCompanies().subscribe({
+      next: (companies) => {
+        if (companies && companies.length > 0) {
+          const mapped: GstProfile[] = companies.map((c, index) => {
+            const code = (c.gstin && c.gstin.length >= 2) ? c.gstin.substring(0, 2) : '09';
+            let createdOn = '11 Apr 2026';
+            if (c.createdAt) {
+              try {
+                const date = new Date(c.createdAt);
+                if (!isNaN(date.getTime())) {
+                  createdOn = date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                }
+              } catch (_) {}
+            }
+            return {
+              id: String(c.id),
+              sNo: index + 1,
+              createdOn,
+              companyName: c.companyName,
+              ownerName: c.ownerName,
+              gstin: c.gstin,
+              sellerStateCode: code,
+              gstr1Status: 'No',
+              gstr3bStatus: 'No',
+              username: c.ownerName,
+              period: 'September 2026',
+              periodCode: '092026',
+              year: '2026',
+              month: 'September',
+            };
+          });
+          this.profiles.set(mapped);
+          if (!this.activeProfile() || !mapped.some(p => p.id === this.activeProfile()?.id)) {
+            this.activeProfile.set(mapped[0]);
+          }
+        }
+      },
+      error: (err) => {
+        console.warn('Backend /api/companies not reachable yet, using existing profiles:', err);
+      }
+    });
+  }
+
   // Constant / Config Data State
   readonly constantConfig = signal<ConstantConfig>(INITIAL_CONSTANT_CONFIG);
 
   // Profile Filters
   readonly profileSearch = signal<string>('');
-  readonly profileFilingFilter = signal<string>('All');
   readonly profileGstr1Filter = signal<string>('All');
   readonly profileGstr3bFilter = signal<string>('All');
 
   // Filtered Profiles computed
   readonly filteredProfiles = computed(() => {
     const query = this.profileSearch().trim().toLowerCase();
-    const filing = this.profileFilingFilter();
     const gstr1 = this.profileGstr1Filter();
     const gstr3b = this.profileGstr3bFilter();
 
@@ -52,11 +98,10 @@ export class ClientStateService {
         p.ownerName.toLowerCase().includes(query) ||
         p.gstin.toLowerCase().includes(query);
 
-      const matchFiling = filing === 'All' || p.typeOfFiling === filing;
       const matchGstr1 = gstr1 === 'All' || p.gstr1Status === gstr1;
       const matchGstr3b = gstr3b === 'All' || p.gstr3bStatus === gstr3b;
 
-      return matchSearch && matchFiling && matchGstr1 && matchGstr3b;
+      return matchSearch && matchGstr1 && matchGstr3b;
     });
   });
 
@@ -129,11 +174,31 @@ export class ClientStateService {
   }
 
   deleteProfile(id: string): void {
-    this.profiles.update((list) => list.filter((p) => p.id !== id));
-    if (this.activeProfile()?.id === id) {
-      this.activeProfile.set(this.profiles()[0] || null);
+    const isBackendId = !isNaN(Number(id));
+    if (isBackendId) {
+      this.gstApi.deleteCompany(id).subscribe({
+        next: () => {
+          this.profiles.update((list) => list.filter((p) => p.id !== id));
+          if (this.activeProfile()?.id === id) {
+            this.activeProfile.set(this.profiles()[0] || null);
+          }
+          this.showToast('Profile deleted successfully.', 'success');
+        },
+        error: (err) => {
+          this.profiles.update((list) => list.filter((p) => p.id !== id));
+          if (this.activeProfile()?.id === id) {
+            this.activeProfile.set(this.profiles()[0] || null);
+          }
+          this.showToast(err.message || 'Profile deleted.', 'info');
+        },
+      });
+    } else {
+      this.profiles.update((list) => list.filter((p) => p.id !== id));
+      if (this.activeProfile()?.id === id) {
+        this.activeProfile.set(this.profiles()[0] || null);
+      }
+      this.showToast('Profile deleted successfully.', 'info');
     }
-    this.showToast('Profile deleted successfully.', 'info');
   }
 
   setActiveProfile(profile: GstProfile): void {
@@ -144,7 +209,6 @@ export class ClientStateService {
       gstin: profile.gstin,
       period: profile.period,
       periodCode: profile.periodCode,
-      type: profile.typeOfFiling,
       year: profile.year,
       sellerStateCode: profile.sellerStateCode,
     });
@@ -280,7 +344,6 @@ export class ClientStateService {
 
   clearProfileFilters(): void {
     this.profileSearch.set('');
-    this.profileFilingFilter.set('All');
     this.profileGstr1Filter.set('All');
     this.profileGstr3bFilter.set('All');
   }

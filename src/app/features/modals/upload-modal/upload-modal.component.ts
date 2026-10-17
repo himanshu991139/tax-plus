@@ -7,9 +7,6 @@ import { ClientStateService } from '../../../core/services/client-state.service'
 import { GstApiService } from '../../../core/services/gst-api.service';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { PlatformLogoComponent } from '../../../shared/components/platform-logo/platform-logo.component';
-import { InrCurrencyPipe } from '../../../shared/pipes/inr-currency.pipe';
-import { Gstr1Payload, Gstr1Summary } from '../../../core/models/gstr1.model';
-import { GST_STATE_MAP } from '../../../core/utils/state-codes';
 
 @Component({
   selector: 'app-upload-modal',
@@ -21,7 +18,6 @@ import { GST_STATE_MAP } from '../../../core/utils/state-codes';
     MatTooltipModule,
     IconComponent,
     PlatformLogoComponent,
-    InrCurrencyPipe,
   ],
   template: `
     @if (state.isUploadModalOpen()) {
@@ -59,113 +55,6 @@ import { GST_STATE_MAP } from '../../../core/utils/state-codes';
               </div>
             }
 
-            @if (conversionSuccess(); as result) {
-              <!-- Success Banner & Summary -->
-              <div class="success-result-box mb-4">
-                <div class="d-flex align-items-center gap-2 mb-3">
-                  <div class="success-check-badge">
-                    <app-icon name="check" [size]="20"></app-icon>
-                  </div>
-                  <div>
-                    <h4 class="m-0 text-success fw-bold">GSTR-1 JSON Generated Successfully!</h4>
-                    <small class="text-muted">The file has been prepared according to official GSTN Schema.</small>
-                  </div>
-                </div>
-
-                <!-- Stats summary grid -->
-                <div class="row g-2 mb-3">
-                  <div class="col-6 col-md-3">
-                    <div class="stat-mini-card">
-                      <div class="stat-label">Taxable Value</div>
-                      <div class="stat-num text-primary">{{ summary()?.totalTaxableValue | inrCurrency }}</div>
-                    </div>
-                  </div>
-                  <div class="col-6 col-md-3">
-                    <div class="stat-mini-card">
-                      <div class="stat-label">Total Tax</div>
-                      <div class="stat-num text-dark">{{ summary()?.totalTax | inrCurrency }}</div>
-                    </div>
-                  </div>
-                  <div class="col-6 col-md-3">
-                    <div class="stat-mini-card">
-                      <div class="stat-label">Net Invoices</div>
-                      <div class="stat-num text-info">{{ summary()?.netInvoices || 0 }}</div>
-                    </div>
-                  </div>
-                  <div class="col-6 col-md-3">
-                    <div class="stat-mini-card">
-                      <div class="stat-label">POS States</div>
-                      <div class="stat-num text-secondary">{{ summary()?.posCount || 0 }}</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="d-flex flex-wrap gap-2 justify-content-end">
-                  <button type="button" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1" (click)="downloadJson()">
-                    <app-icon name="download" [size]="14"></app-icon>
-                    <span>Download JSON Again</span>
-                  </button>
-                  <button type="button" class="btn btn-primary-navy btn-sm d-flex align-items-center gap-1" (click)="viewStatement()">
-                    <app-icon name="eye" [size]="14"></app-icon>
-                    <span>View Full Statement</span>
-                  </button>
-                </div>
-              </div>
-            }
-
-            <!-- Quick sample loader bar -->
-            <div class="quick-sample-bar mb-3 d-flex align-items-center justify-content-between p-2 rounded bg-light border">
-              <div class="d-flex align-items-center gap-2">
-                <span class="badge bg-primary">Sample Data Ready</span>
-                <small class="text-muted">Includes September 2026 TCS Sales, Returns & Invoices</small>
-              </div>
-              <button
-                type="button"
-                class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
-                (click)="loadSampleSeptemberData()"
-                [disabled]="isLoadingSample() || isSubmitting()"
-              >
-                @if (isLoadingSample()) {
-                  <span class="spinner-border spinner-border-sm" role="status"></span>
-                  <span>Loading...</span>
-                } @else {
-                  <app-icon name="cloud-upload" [size]="14"></app-icon>
-                  <span>Quick Load Sample Files</span>
-                }
-              </button>
-            </div>
-
-            <!-- Parameters Row -->
-            <div class="row g-3 mb-3">
-              <div class="col-md-5">
-                <label class="form-label fw-semibold small text-muted">Seller GSTIN</label>
-                <input
-                  type="text"
-                  class="form-control font-mono"
-                  [(ngModel)]="formGstin"
-                  placeholder="e.g. 09OYVPS2177B2ZI"
-                  maxlength="15"
-                />
-              </div>
-              <div class="col-md-3">
-                <label class="form-label fw-semibold small text-muted">Filing Period (MMYYYY)</label>
-                <input
-                  type="text"
-                  class="form-control font-mono"
-                  [(ngModel)]="formPeriod"
-                  placeholder="092026"
-                  maxlength="6"
-                />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label fw-semibold small text-muted">Seller State Code</label>
-                <select class="form-select font-mono" [(ngModel)]="formStateCode">
-                  @for (stateEntry of statesList; track stateEntry.code) {
-                    <option [value]="stateEntry.code">{{ stateEntry.code }} - {{ stateEntry.name }}</option>
-                  }
-                </select>
-              </div>
-            </div>
 
             <!-- Upload File Inputs -->
             <div class="file-dropzone-group">
@@ -199,11 +88,11 @@ import { GST_STATE_MAP } from '../../../core/utils/state-codes';
                 }
               </div>
 
-              <!-- File 2: TCS Sales Return (Optional) -->
+              <!-- File 2: TCS Sales Return (Required) -->
               <div class="dropzone-box mt-3" [class.has-file]="returnFile()">
                 <div class="dropzone-header">
                   <div class="dropzone-title">
-                    <span class="badge bg-secondary-subtle text-secondary border me-1">Optional</span>
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle me-1">Required</span>
                     <strong>TCS Sales Return Report</strong> (.xlsx or .csv)
                   </div>
                   <small class="text-muted">Customer returns & RTOs report (tcs_sales_return.csv/xlsx)</small>
@@ -229,11 +118,11 @@ import { GST_STATE_MAP } from '../../../core/utils/state-codes';
                 }
               </div>
 
-              <!-- File 3: Tax Invoice Details (Optional) -->
+              <!-- File 3: Tax Invoice Details (Required) -->
               <div class="dropzone-box mt-3" [class.has-file]="invoiceFile()">
                 <div class="dropzone-header">
                   <div class="dropzone-title">
-                    <span class="badge bg-secondary-subtle text-secondary border me-1">Optional</span>
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle me-1">Required</span>
                     <strong>Tax Invoice Details Report</strong> (.xlsx or .csv)
                   </div>
                   <small class="text-muted">Tax invoice document series report (tax_invoice_details.csv/xlsx)</small>
@@ -264,7 +153,7 @@ import { GST_STATE_MAP } from '../../../core/utils/state-codes';
               <div class="mt-3">
                 <mat-progress-bar mode="indeterminate"></mat-progress-bar>
                 <div class="text-center mt-2 small text-primary fw-semibold">
-                  Uploading files to Spring Boot API and aggregating GSTR-1 tables...
+                  Uploading reports and converting to GSTR-1...
                 </div>
               </div>
             }
@@ -284,14 +173,14 @@ import { GST_STATE_MAP } from '../../../core/utils/state-codes';
               type="button"
               class="btn btn-primary-navy d-flex align-items-center gap-2"
               (click)="submitConversion()"
-              [disabled]="!salesFile() || isSubmitting()"
+              [disabled]="!salesFile() || !returnFile() || !invoiceFile() || isSubmitting()"
             >
               @if (isSubmitting()) {
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                <span>Converting...</span>
+                <span>Submitting...</span>
               } @else {
-                <app-icon name="cloud-upload" [size]="16"></app-icon>
-                <span>Generate & Download GSTR-1</span>
+                <app-icon name="check" [size]="16"></app-icon>
+                <span>Submit</span>
               }
             </button>
           </div>
@@ -505,21 +394,12 @@ export class UploadModalComponent {
   readonly state = inject(ClientStateService);
   private readonly gstApi = inject(GstApiService);
 
-  formGstin = '09OYVPS2177B2ZI';
-  formPeriod = '092026';
-  formStateCode = '09';
-
   readonly salesFile = signal<File | null>(null);
   readonly returnFile = signal<File | null>(null);
   readonly invoiceFile = signal<File | null>(null);
 
   readonly isSubmitting = signal<boolean>(false);
-  readonly isLoadingSample = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
-  readonly conversionSuccess = signal<Gstr1Payload | null>(null);
-  readonly summary = signal<Gstr1Summary | null>(null);
-
-  readonly statesList = Object.entries(GST_STATE_MAP).map(([code, name]) => ({ code, name }));
 
   currentPlatformLogo(): string {
     return this.state.selectedPlatform()?.logoType || 'meesho';
@@ -541,76 +421,39 @@ export class UploadModalComponent {
     }
   }
 
-  async loadSampleSeptemberData(): Promise<void> {
-    this.isLoadingSample.set(true);
-    this.errorMessage.set(null);
-    try {
-      const sales = await this.gstApi.loadSampleFile(
-        '/sample-data/meesho_september_2026/tcs_sales.csv',
-        'tcs_sales.csv',
-        'text/csv'
-      );
-      const returns = await this.gstApi.loadSampleFile(
-        '/sample-data/meesho_september_2026/tcs_sales_return.csv',
-        'tcs_sales_return.csv',
-        'text/csv'
-      );
-      const invoices = await this.gstApi.loadSampleFile(
-        '/sample-data/meesho_september_2026/tax_invoice_details.csv',
-        'tax_invoice_details.csv',
-        'text/csv'
-      );
-
-      this.salesFile.set(sales);
-      this.returnFile.set(returns);
-      this.invoiceFile.set(invoices);
-      this.formGstin = '09OYVPS2177B2ZI';
-      this.formPeriod = '092026';
-      this.formStateCode = '09';
-
-      this.state.showToast('September 2026 sample CSV files loaded into form!', 'success');
-    } catch (err: any) {
-      this.errorMessage.set('Could not load sample data: ' + (err.message || err));
-    } finally {
-      this.isLoadingSample.set(false);
-    }
-  }
-
   submitConversion(): void {
     const sales = this.salesFile();
-    if (!sales) {
-      this.errorMessage.set('Please select the required TCS Sales Report file.');
+    const returnF = this.returnFile();
+    const invoiceF = this.invoiceFile();
+
+    if (!sales || !returnF || !invoiceF) {
+      this.errorMessage.set('All 3 reports (TCS Sales, TCS Sales Return, and Tax Invoice Details) are required.');
       return;
     }
 
     this.isSubmitting.set(true);
     this.errorMessage.set(null);
 
+    const client = this.state.clientInfo();
+    const gstin = client.gstin || '';
+    const period = client.periodCode || '092026';
+    const sellerStateCode = client.sellerStateCode || (gstin.length >= 2 ? gstin.substring(0, 2) : '09');
+
     const formData = new FormData();
     formData.append('tcs_sales', sales);
-    if (this.returnFile()) {
-      formData.append('tcs_sales_return', this.returnFile()!);
-    }
-    if (this.invoiceFile()) {
-      formData.append('tax_invoice_details', this.invoiceFile()!);
-    }
-    formData.append('gstin', this.formGstin.trim());
-    formData.append('period', this.formPeriod.trim());
-    formData.append('sellerStateCode', this.formStateCode.trim());
+    formData.append('tcs_sales_return', returnF);
+    formData.append('tax_invoice_details', invoiceF);
+    formData.append('gstin', gstin);
+    formData.append('period', period);
+    formData.append('sellerStateCode', sellerStateCode);
 
     this.gstApi.convertMeesho(formData).subscribe({
       next: (payload) => {
         this.isSubmitting.set(false);
-        this.conversionSuccess.set(payload);
-        const calculatedSummary = this.gstApi.calculateSummary(payload);
-        this.summary.set(calculatedSummary);
-
-        // Store into global state
         this.state.setGstr1Payload(payload);
-        this.state.showToast('GSTR-1 JSON successfully generated & downloaded!', 'success');
-
-        // Automatically trigger browser download of JSON file
-        this.gstApi.downloadJsonFile(payload, `GSTR1_Meesho_${this.formPeriod.trim()}.json`);
+        this.state.showToast('Platform reports submitted successfully! View Statement and Generate & Download GSTR-1 are now available.', 'success');
+        this.state.closeUploadModal();
+        this.resetFiles();
       },
       error: (err) => {
         this.isSubmitting.set(false);
@@ -619,16 +462,11 @@ export class UploadModalComponent {
     });
   }
 
-  downloadJson(): void {
-    const payload = this.conversionSuccess();
-    if (payload) {
-      this.gstApi.downloadJsonFile(payload, `GSTR1_Meesho_${this.formPeriod.trim()}.json`);
-    }
-  }
-
-  viewStatement(): void {
-    this.state.closeUploadModal();
-    this.state.openStatementModal();
+  resetFiles(): void {
+    this.salesFile.set(null);
+    this.returnFile.set(null);
+    this.invoiceFile.set(null);
+    this.errorMessage.set(null);
   }
 
   formatBytes(bytes: number): string {

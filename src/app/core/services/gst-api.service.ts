@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, map, throwError } from 'rxjs';
 import { Gstr1Payload, Gstr1Summary } from '../models/gstr1.model';
+import { CompanyEntity, CompanyDto } from '../models/client-info.model';
 
 @Injectable({
   providedIn: 'root',
@@ -10,6 +11,64 @@ export class GstApiService {
   private readonly http = inject(HttpClient);
   // Default to proxy path '/api/v1/gst', fallback to direct Spring Boot port 8080 if running standalone
   private readonly apiUrl = '/api/v1/gst/convert-meesho';
+  private readonly companiesUrl = '/api/companies';
+
+  /**
+   * Fetches all registered companies from backend GET /api/companies
+   */
+  getCompanies(): Observable<CompanyEntity[]> {
+    return this.http.get<CompanyEntity[]>(this.companiesUrl).pipe(
+      catchError((error: HttpErrorResponse) => {
+        let errorMessage = 'Failed to load companies from backend.';
+        if (error.error && typeof error.error === 'object' && error.error.message) {
+          errorMessage = error.error.message;
+        } else if (typeof error.error === 'string') {
+          errorMessage = error.error;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        return throwError(() => new Error(errorMessage));
+      })
+    );
+  }
+
+  /**
+   * Creates a new company in backend POST /api/companies
+   */
+  createCompany(dto: CompanyDto): Observable<CompanyEntity> {
+    return this.http.post<CompanyEntity>(this.companiesUrl, dto).pipe(
+      catchError((error: HttpErrorResponse) => {
+        let errorMessage = 'Failed to create company.';
+        if (error.error && typeof error.error === 'object' && error.error.message) {
+          errorMessage = error.error.message;
+        } else if (typeof error.error === 'string') {
+          errorMessage = error.error;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        return throwError(() => new Error(errorMessage));
+      })
+    );
+  }
+
+  /**
+   * Deletes a company by ID via DELETE /api/companies/{id}
+   */
+  deleteCompany(id: number | string): Observable<void> {
+    return this.http.delete<void>(`${this.companiesUrl}/${id}`).pipe(
+      catchError((error: HttpErrorResponse) => {
+        let errorMessage = 'Failed to delete company.';
+        if (error.error && typeof error.error === 'object' && error.error.message) {
+          errorMessage = error.error.message;
+        } else if (typeof error.error === 'string') {
+          errorMessage = error.error;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        return throwError(() => new Error(errorMessage));
+      })
+    );
+  }
 
   /**
    * Sends multipart form data to convert Meesho reports into GSTR-1 JSON

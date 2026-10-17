@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ClientStateService } from '../../../core/services/client-state.service';
+import { GstApiService } from '../../../core/services/gst-api.service';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 
 @Component({
@@ -68,38 +69,7 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
             </div>
           </div>
 
-          <!-- Period -->
-          <div class="meta-item">
-            <div class="meta-icon-col">
-              <app-icon name="calendar" [size]="18"></app-icon>
-            </div>
-            <div class="meta-text-col">
-              <div class="meta-label">Period</div>
-              <div class="meta-value">{{ state.clientInfo().period }}</div>
-            </div>
-          </div>
 
-          <!-- Type -->
-          <div class="meta-item">
-            <div class="meta-icon-col">
-              <app-icon name="file-text" [size]="18"></app-icon>
-            </div>
-            <div class="meta-text-col">
-              <div class="meta-label">Type</div>
-              <div class="meta-value">{{ state.clientInfo().type }}</div>
-            </div>
-          </div>
-
-          <!-- Year -->
-          <div class="meta-item">
-            <div class="meta-icon-col">
-              <app-icon name="calendar" [size]="18"></app-icon>
-            </div>
-            <div class="meta-text-col">
-              <div class="meta-label">Year</div>
-              <div class="meta-value">{{ state.clientInfo().year }}</div>
-            </div>
-          </div>
         </div>
 
         <!-- Switch Client Action Button -->
@@ -109,7 +79,7 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
         </button>
       </div>
 
-      <!-- Action Row: View Statement -->
+      <!-- Action Row: View Statement & Generate & Download GSTR-1 -->
       <div class="action-row">
         <button
           type="button"
@@ -121,6 +91,17 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
           @if (state.gstr1Payload()) {
             <span class="statement-ready-dot" title="Data generated from backend"></span>
           }
+        </button>
+
+        <button
+          type="button"
+          class="btn-download-gstr1"
+          (click)="downloadGstr1()"
+          [disabled]="!state.gstr1Payload()"
+          [title]="state.gstr1Payload() ? 'Download generated GSTR-1 JSON' : 'Submit platform data first to enable GSTR-1 download'"
+        >
+          <app-icon name="download" [size]="15"></app-icon>
+          <span>Generate & Download GSTR-1</span>
         </button>
       </div>
     </div>
@@ -266,6 +247,8 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
         margin-top: 14px;
         display: flex;
         align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
       }
 
       .btn-view-statement {
@@ -297,9 +280,53 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
           box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.4);
         }
       }
+
+      .btn-download-gstr1 {
+        background: linear-gradient(135deg, #4f46e5, #6366f1);
+        color: #ffffff;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 18px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
+        transition: all 0.15s ease-in-out;
+
+        &:hover:not(:disabled) {
+          background: linear-gradient(135deg, #4338ca, #4f46e5);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 10px rgba(79, 70, 229, 0.35);
+        }
+
+        &:disabled {
+          background: #e2e8f0;
+          color: #94a3b8;
+          box-shadow: none;
+          cursor: not-allowed;
+          opacity: 0.7;
+        }
+      }
     `,
   ],
 })
 export class ClientHeaderComponent {
   readonly state = inject(ClientStateService);
+  private readonly gstApi = inject(GstApiService);
+
+  downloadGstr1(): void {
+    const payload = this.state.gstr1Payload();
+    if (!payload) {
+      this.state.showToast('Please submit platform reports first to generate GSTR-1.', 'warning');
+      return;
+    }
+    const client = this.state.clientInfo();
+    const period = client.periodCode || 'return';
+    const filename = `GSTR1_${client.company || 'Client'}_${period}.json`;
+    this.gstApi.downloadJsonFile(payload, filename);
+    this.state.showToast('GSTR-1 JSON downloaded successfully!', 'success');
+  }
 }
