@@ -11,6 +11,7 @@ import {
 import { Platform, PLATFORMS_DATA } from '../models/platform.model';
 import { Gstr1Payload, Gstr1Summary } from '../models/gstr1.model';
 import { GstApiService } from './gst-api.service';
+import { apiUrl } from '../config/app-config';
 
 export interface ToastMessage {
   id: number;
@@ -157,7 +158,11 @@ export class ClientStateService {
   }
 
   // Constant / Config Data State
-  readonly constantConfig = signal<ConstantConfig>(INITIAL_CONSTANT_CONFIG);
+  readonly constantConfig = signal<ConstantConfig>({
+    ...INITIAL_CONSTANT_CONFIG,
+    // Show the effective endpoint (resolved against the runtime backend origin).
+    apiBaseUrl: apiUrl(INITIAL_CONSTANT_CONFIG.apiBaseUrl),
+  });
 
   // Profile Filters
   readonly profileSearch = signal<string>('');

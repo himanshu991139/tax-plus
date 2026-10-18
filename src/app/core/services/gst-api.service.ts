@@ -3,15 +3,17 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, catchError, map, throwError } from 'rxjs';
 import { Gstr1Payload, Gstr1Summary } from '../models/gstr1.model';
 import { CompanyEntity, CompanyDto } from '../models/client-info.model';
+import { apiUrl } from '../config/app-config';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GstApiService {
   private readonly http = inject(HttpClient);
-  // Default to proxy path '/api/v1/gst', fallback to direct Spring Boot port 8080 if running standalone
-  private readonly apiUrl = '/api/v1/gst/convert-meesho';
-  private readonly companiesUrl = '/api/companies';
+  // Resolved from runtime config (public/api-config.json): dev routes through
+  // the proxy to localhost:8080, prod through the configured backend origin.
+  private readonly convertUrl = apiUrl('/api/v1/gst/convert-meesho');
+  private readonly companiesUrl = apiUrl('/api/companies');
 
   /**
    * Fetches all registered companies from backend GET /api/companies
@@ -93,7 +95,7 @@ export class GstApiService {
    * Sends multipart form data to convert Meesho reports into GSTR-1 JSON
    */
   convertMeesho(formData: FormData): Observable<Gstr1Payload> {
-    return this.http.post<Gstr1Payload>(this.apiUrl, formData).pipe(
+    return this.http.post<Gstr1Payload>(this.convertUrl, formData).pipe(
       catchError((error: HttpErrorResponse) => {
         let errorMessage = 'Failed to convert Meesho reports.';
         if (error.error && typeof error.error === 'object' && error.error.message) {

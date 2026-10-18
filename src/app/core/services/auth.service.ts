@@ -1,5 +1,5 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { environment } from '../../../environments/environment';
+import { apiOrigin, apiUrl } from '../config/app-config';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, catchError, of, switchMap } from 'rxjs';
@@ -55,13 +55,13 @@ export class AuthService {
 
     const token = localStorage.getItem('jwt');
 
-    return this.http.get<UserProfile>('/api/auth/user', { withCredentials: true }).pipe(
+    return this.http.get<UserProfile>(apiUrl('/api/auth/user'), { withCredentials: true }).pipe(
       switchMap(user => {
         if (user && user.authenticated) {
           this.currentUser.set(user);
           // If token wasn't saved yet, fetch it from backend
           if (!localStorage.getItem('jwt')) {
-            return this.http.get<{ token: string }>('/api/auth/token', { withCredentials: true }).pipe(
+            return this.http.get<{ token: string }>(apiUrl('/api/auth/token'), { withCredentials: true }).pipe(
               tap(res => {
                 if (res?.token) {
                   localStorage.setItem('jwt', res.token);
@@ -89,11 +89,11 @@ export class AuthService {
   }
 
   loginWithGoogle(): void {
-    window.location.href = `${environment.apiOrigin}/oauth2/authorization/google`;
+    window.location.href = `${apiOrigin()}/oauth2/authorization/google`;
   }
 
   logout(): void {
-    this.http.post('/api/auth/logout', {}, { withCredentials: true })
+    this.http.post(apiUrl('/api/auth/logout'), {}, { withCredentials: true })
       .pipe(catchError(() => of(null)))
       .subscribe(() => {
         this.currentUser.set(null);

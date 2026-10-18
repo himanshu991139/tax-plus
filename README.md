@@ -61,6 +61,43 @@ Navigate to: **[http://localhost:4200/app/dashboard/import](http://localhost:420
 
 ---
 
+## ☁️ Production Deployment (Firebase Hosting)
+
+The app is deployed as a static site on Firebase Hosting (e.g. **https://gstr1generator.web.app**). Because Firebase Hosting only serves static files, the frontend talks to the Spring Boot backend through a configurable **backend origin**.
+
+### 1. Configure the backend origin
+
+At startup the app fetches **`public/api-config.json`** (served next to `index.html`) and uses it for every API call (`/api/**`) and the OAuth login redirect:
+
+```json
+{
+  "apiOrigin": "https://YOUR-BACKEND-HOST",
+  "gstConvertEndpoint": "/api/v1/gst/convert-meesho"
+}
+```
+
+- `"apiOrigin": ""` (default) = same-origin relative URLs — only correct if a reverse proxy in front of the frontend forwards `/api` and `/oauth2` to the backend.
+- For a separately hosted backend, set `apiOrigin` to its origin (no trailing slash), e.g. `https://gstr1-api-xxxx.a.run.app`.
+- Changing the backend later only requires editing this file and re-running `firebase deploy` — **no rebuild needed**. Build-time fallbacks live in `src/environments/environment.prod.ts`.
+
+### 2. Backend (Spring Boot) must allow the frontend origin
+
+On the backend side, for CORS and the Google OAuth flow:
+
+- **CORS**: allow origin `https://gstr1generator.web.app` (and `http://localhost:4200` for dev) with `Allow-Credentials: true` (the auth endpoints use cookies). Do **not** use `*` together with credentials.
+- **OAuth redirect**: allow `https://gstr1generator.web.app` as a trusted redirect/success URL so the `?token=` redirect after Google login returns to the hosted frontend.
+
+### 3. Build & deploy
+
+```bash
+npm run build
+firebase deploy --only hosting
+```
+
+`firebase.json` sets `Cache-Control: no-cache` for `index.html` and `api-config.json` (so config changes take effect immediately) and immutable caching for the hashed `/build/**` assets.
+
+---
+
 ## 📁 Project Structure
 
 ```

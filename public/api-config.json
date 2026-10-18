@@ -1,0 +1,4 @@
+{
+  "apiOrigin": "https://tax-plus-spring-boot.onrender.com",
+  "gstConvertEndpoint": "/api/v1/gst/convert-meesho"
+}
