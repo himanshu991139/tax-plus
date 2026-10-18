@@ -30,7 +30,8 @@ export class ClientStateService {
   readonly activeProfile = signal<GstProfile | null>(INITIAL_PROFILES[1]); // Default to dsdivine13
 
   constructor() {
-    this.loadProfilesFromBackend();
+    // Profiles are loaded explicitly via loadProfilesFromBackend() when needed
+    // (e.g., ProfilesComponent.ngOnInit), not automatically on app/login load.
   }
 
   loadProfilesFromBackend(): void {
