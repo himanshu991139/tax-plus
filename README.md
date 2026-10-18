@@ -1,12 +1,12 @@
-# GST ProSeller Frontend (Angular 22)
+# EcomSalesToGST Frontend (Angular 22)
 
-A modern, high-performance Angular 22 application replicating the architecture and UI of [GST ProSeller](https://gstproseller.com/app/dashboard/import), integrated directly with the Spring Boot GSTR-1 backend API (`/api/v1/gst/convert-meesho`).
+A modern, high-performance Angular 22 application for importing e-commerce platform sales data and generating GSTR-1 filings, integrated directly with the Spring Boot backend API (`/api/v1/gst/convert-meesho`).
 
 ---
 
 ## 🚀 Key Features
 
-- **GST ProSeller Architecture & Layout**:
+- **EcomSalesToGST Architecture & Layout**:
   - **Top Navigation Bar**: Brand logo, dropdown menus (`Ecom. Sellers`, `Free Tools`, `Accounting Services` with Tax & Compliance mega-menu), Support, Pricing, and user profile (`Hello, himanshu`).
   - **Left Sidebar**: `Dashboard` (active), `Gov Excel to JSON`, `CSV to JSON`, `JSON Validator`, `2A/2B Reconciliation`, `Ecom to Tally XML` (with `NEW` badge), `Support`, `Settings`, and `Logout`.
   - **Client Metadata Bar**: Real-time display for Company (`dsdivine13`), Client, GSTIN (`09OYVPS2177B2ZI`), Period (`September 2026`), Type (`Monthly`), Year (`2026`), and interactive `Switch Client` action.
@@ -28,7 +28,7 @@ A modern, high-performance Angular 22 application replicating the architecture a
 - **Prebuilt Libraries + Custom CSS**:
   - **Bootstrap 5.3** & **Bootstrap Icons** for responsive grid, alerts, tables, and utility classes.
   - **Angular Material 22 & CDK** for progress bars, tabs, tooltips, and themes.
-  - **Custom SCSS** implementing GST ProSeller's design system.
+  - **Custom SCSS** implementing EcomSalesToGST's design system.
 
 ---
 

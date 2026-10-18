@@ -26,7 +26,7 @@ import { AuthService } from './core/services/auth.service';
   styleUrl: './app.scss',
 })
 export class App {
-  title = 'TaxPulse GST Suite';
+  title = 'EcomSalesToGST';
   readonly auth = inject(AuthService);
 }
 
