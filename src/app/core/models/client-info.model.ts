@@ -1,3 +1,5 @@
+import { environment } from '../../../environments/environment';
+
 export interface ClientInfo {
   id?: string;
   company: string;
@@ -61,7 +63,7 @@ export interface ConstantConfig {
 }
 
 export const INITIAL_CONSTANT_CONFIG: ConstantConfig = {
-  apiBaseUrl: 'http://localhost:8080/api/v1/gst/convert-meesho',
+  apiBaseUrl: environment.gstConvertEndpoint,
   currentFilingPeriod: '9/15',
   filingDeadlineDaysLeft: 6,
   maxProfilesAllowed: 10,
