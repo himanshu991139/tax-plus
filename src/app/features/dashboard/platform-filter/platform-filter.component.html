@@ -5,6 +5,7 @@
         <input
           type="text"
           class="search-input"
+          maxlength="100"
           placeholder="Search platforms..."
           [ngModel]="state.searchQuery()"
           (ngModelChange)="state.searchQuery.set($event)"

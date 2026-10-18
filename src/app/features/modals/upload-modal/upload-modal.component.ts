@@ -43,10 +43,34 @@ export class UploadModalComponent {
     }
   }
 
+  private static readonly ALLOWED_EXTENSIONS = ['.csv', '.xlsx', '.xls'];
+  private static readonly MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
+
   onFileSelected(event: Event, type: 'sales' | 'return' | 'invoice'): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
+
+      const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+      if (!UploadModalComponent.ALLOWED_EXTENSIONS.includes(ext)) {
+        this.errorMessage.set(`Invalid file type for "${file.name}". Please upload a .csv, .xlsx or .xls file.`);
+        input.value = '';
+        return;
+      }
+
+      if (file.size === 0) {
+        this.errorMessage.set(`"${file.name}" is empty. Please choose a valid report file.`);
+        input.value = '';
+        return;
+      }
+
+      if (file.size > UploadModalComponent.MAX_FILE_SIZE_BYTES) {
+        this.errorMessage.set(`"${file.name}" is ${this.formatBytes(file.size)}. Maximum allowed size is 10 MB.`);
+        input.value = '';
+        return;
+      }
+
+      this.errorMessage.set(null);
       if (type === 'sales') this.salesFile.set(file);
       else if (type === 'return') this.returnFile.set(file);
       else if (type === 'invoice') this.invoiceFile.set(file);

@@ -14,20 +14,25 @@
           <div class="modal-body-custom">
             <div class="mb-3">
               <label class="form-label small fw-bold text-dark">Backend API Endpoint URL</label>
-              <input type="text" class="form-control font-mono" [(ngModel)]="formConfig.apiBaseUrl" />
+              <input type="text" class="form-control font-mono" maxlength="500" [(ngModel)]="formConfig.apiBaseUrl" />
               <small class="text-muted">Spring Boot Meesho GSTR-1 converter endpoint</small>
+              @if (apiUrlInvalid()) {
+                <div class="invalid-feedback d-block small">
+                  Endpoint must be a valid URL starting with http:// or https://
+                </div>
+              }
             </div>
 
             <div class="row g-3 mb-3">
               <div class="col-md-6">
                 <label class="form-label small fw-bold text-dark">Current Filing Period Tracker</label>
-                <input type="text" class="form-control" [(ngModel)]="formConfig.currentFilingPeriod" />
+                <input type="text" class="form-control" maxlength="7" [(ngModel)]="formConfig.currentFilingPeriod" />
                 <small class="text-muted">e.g. 9/15</small>
               </div>
 
               <div class="col-md-6">
                 <label class="form-label small fw-bold text-dark">Deadline Days Left</label>
-                <input type="number" class="form-control" [(ngModel)]="formConfig.filingDeadlineDaysLeft" />
+                <input type="number" class="form-control" min="0" max="365" step="1" [(ngModel)]="formConfig.filingDeadlineDaysLeft" />
                 <small class="text-muted">e.g. 6</small>
               </div>
             </div>
@@ -35,7 +40,7 @@
             <div class="row g-3 mb-3">
               <div class="col-md-6">
                 <label class="form-label small fw-bold text-dark">Max Profiles Allowed</label>
-                <input type="number" class="form-control" [(ngModel)]="formConfig.maxProfilesAllowed" />
+                <input type="number" class="form-control" min="1" max="1000" step="1" [(ngModel)]="formConfig.maxProfilesAllowed" />
                 <small class="text-muted">Default limit: 10</small>
               </div>
 
@@ -63,7 +68,7 @@
             <button type="button" class="btn btn-outline-secondary" (click)="state.closeConstantConfigModal()">
               Cancel
             </button>
-            <button type="button" class="btn btn-brand-indigo" (click)="saveConfig()">
+            <button type="button" class="btn btn-brand-indigo" (click)="saveConfig()" [disabled]="apiUrlInvalid()">
               Save Configuration
             </button>
           </div>

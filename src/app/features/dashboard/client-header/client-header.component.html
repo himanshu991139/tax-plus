@@ -35,7 +35,10 @@
               <div class="meta-value d-flex align-items-center gap-2">
                 <span>{{ state.clientInfo().company }}</span>
                 @if (state.activeProfile()?.isDefault) {
-                  <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill" style="font-size: 10px; font-weight: 700; padding: 2px 7px;">Default Profile</span>
+                  <span class="badge-default-profile" title="Default filing profile">
+                    <app-icon name="star-filled" [size]="12"></app-icon>
+                    <span>Default Profile</span>
+                  </span>
                 }
               </div>
             </div>

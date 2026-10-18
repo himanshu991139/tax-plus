@@ -91,6 +91,7 @@
           <input
             type="text"
             class="search-input"
+            maxlength="100"
             placeholder="Search profiles..."
             [ngModel]="state.profileSearch()"
             (ngModelChange)="state.profileSearch.set($event)"

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClientStateService } from '../../../core/services/client-state.service';
@@ -28,9 +28,23 @@ export class AddProfileModalComponent {
   readonly detectedState = signal<string | null>(null);
   readonly stateCode = signal<string>('09');
 
+  /** GSTIN format: 2-digit state code + 10-char PAN + entity number + 'Z' + check char. */
+  private static readonly GSTIN_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z][0-9A-Z]$/;
+
+  /** True when something is typed but it does not yet match the GSTIN format. */
+  readonly gstinInvalid = computed(() => {
+    const v = this.gstin.trim().toUpperCase();
+    return v.length > 0 && !AddProfileModalComponent.GSTIN_REGEX.test(v);
+  });
+
   onGstinChange(val: string): void {
-    if (val && val.length >= 2) {
-      const code = val.substring(0, 2);
+    // Force uppercase so the model matches the displayed value.
+    const upper = (val || '').toUpperCase();
+    if (upper !== val) {
+      this.gstin = upper;
+    }
+    if (upper.length >= 2) {
+      const code = upper.substring(0, 2);
       this.stateCode.set(code);
       const stateName = GST_STATE_MAP[code];
       if (stateName) {
@@ -53,8 +67,13 @@ export class AddProfileModalComponent {
       return;
     }
 
-    if (cleanGstin.length !== 15) {
-      this.state.showToast('GSTIN must be 15 alphanumeric characters.', 'warning');
+    if (!AddProfileModalComponent.GSTIN_REGEX.test(cleanGstin)) {
+      this.state.showToast('GSTIN must be 15 characters in the format 09AAACO4007A1Z3.', 'warning');
+      return;
+    }
+
+    if (cleanCompanyName.length > 100 || cleanOwnerName.length > 100) {
+      this.state.showToast('Company Name and Owner Name must be at most 100 characters.', 'warning');
       return;
     }
 

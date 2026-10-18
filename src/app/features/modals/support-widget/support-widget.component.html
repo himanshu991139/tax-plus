@@ -30,7 +30,7 @@
             } @else {
               <div class="mb-3">
                 <label class="form-label small fw-semibold text-muted">Issue Category</label>
-                <select class="form-select" [(ngModel)]="category">
+                <select class="form-select" required [(ngModel)]="category">
                   <option value="meesho_conversion">Meesho GSTR-1 Conversion Error</option>
                   <option value="tax_mismatch">Table 7 (B2CS) Tax Netting Mismatch</option>
                   <option value="missing_hsn">Table 12 HSN Code Missing</option>
@@ -40,7 +40,15 @@
 
               <div class="mb-3">
                 <label class="form-label small fw-semibold text-muted">Subject</label>
-                <input type="text" class="form-control" [(ngModel)]="subject" placeholder="e.g. Issue converting September 2026 reports" />
+                <input
+                  type="text"
+                  class="form-control"
+                  maxlength="150"
+                  required
+                  [(ngModel)]="subject"
+                  placeholder="e.g. Issue converting September 2026 reports"
+                />
+                <small class="text-muted">{{ subject.length }}/150</small>
               </div>
 
               <div class="mb-3">
@@ -48,9 +56,12 @@
                 <textarea
                   class="form-control"
                   rows="4"
+                  maxlength="2000"
+                  required
                   [(ngModel)]="description"
                   placeholder="Describe what occurred, any specific error message, or invoice series details..."
                 ></textarea>
+                <small class="text-muted">{{ description.length }}/2000</small>
               </div>
             }
           </div>
@@ -60,7 +71,7 @@
               <button type="button" class="btn btn-outline-secondary" (click)="state.closeSupportModal()">
                 Cancel
               </button>
-              <button type="button" class="btn btn-primary-navy" (click)="submitTicket()" [disabled]="!subject.trim()">
+              <button type="button" class="btn btn-primary-navy" (click)="submitTicket()" [disabled]="!subject.trim() || subject.trim().length < 5">
                 Submit Ticket
               </button>
             </div>

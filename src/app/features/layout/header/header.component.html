@@ -62,16 +62,6 @@
 
   <!-- Right: Active Profile Pill & User Menu -->
   <div class="header-right">
-    @if (state.activeProfile(); as active) {
-      <a class="active-profile-pill d-none d-sm-flex" routerLink="/app/dashboard/import" title="Go to Import page">
-        <span class="pill-dot"></span>
-        <span class="pill-client text-truncate">{{ active.companyName }}</span>
-        @if (active.isDefault) {
-          <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-1 py-0 ms-1 rounded-pill" style="font-size: 10px; font-weight: 700;">Default</span>
-        }
-        <span class="pill-period">({{ active.period }})</span>
-      </a>
-    }
 
     <div class="user-profile" (click)="toggleUserMenu()">
       @if (auth.currentUser()?.picture) {

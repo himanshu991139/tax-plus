@@ -25,13 +25,22 @@
               <input
                 type="text"
                 class="form-control font-mono text-uppercase"
+                [class.is-invalid]="gstinInvalid()"
                 placeholder="ENTER GSTIN OF THE CLIENT (E.G. 09AAACO4007A1Z3)"
                 maxlength="15"
                 [(ngModel)]="gstin"
                 (ngModelChange)="onGstinChange($event)"
               />
-              <div class="form-text text-danger small mt-1">
-                Please ensure the GSTIN is entered correctly. Once added, it cannot be modified.
+              @if (gstinInvalid()) {
+                <div class="invalid-feedback d-block small">
+                  GSTIN must be exactly 15 characters: 2-digit state code, 10-character PAN, entity number, 'Z' and a check character (e.g. 09AAACO4007A1Z3).
+                </div>
+              }
+              <div class="d-flex justify-content-between align-items-start gap-2">
+                <div class="form-text text-danger small mt-1">
+                  Please ensure the GSTIN is entered correctly. Once added, it cannot be modified.
+                </div>
+                <small class="text-muted small text-nowrap mt-1">{{ gstin.length }}/15</small>
               </div>
               @if (detectedState()) {
                 <div class="detected-state-pill mt-1">
@@ -50,8 +59,10 @@
                 type="text"
                 class="form-control"
                 placeholder="Enter the Company of the Client"
+                maxlength="100"
                 [(ngModel)]="companyName"
               />
+              <small class="text-muted">{{ companyName.length }}/100</small>
             </div>
 
             <!-- Owner Name -->
@@ -64,8 +75,10 @@
                 type="text"
                 class="form-control"
                 placeholder="Enter the Name of the Client"
+                maxlength="100"
                 [(ngModel)]="ownerName"
               />
+              <small class="text-muted">{{ ownerName.length }}/100</small>
             </div>
 
 
@@ -81,6 +94,7 @@
                 type="text"
                 class="form-control"
                 placeholder="Enter GST Username"
+                maxlength="100"
                 [(ngModel)]="gstUsername"
               />
              
@@ -101,7 +115,7 @@
               type="button"
               class="btn btn-brand-indigo"
               (click)="saveProfile()"
-              [disabled]="!gstin || !companyName || isSubmitting()"
+              [disabled]="!gstin.trim() || !companyName.trim() || gstinInvalid() || isSubmitting()"
             >
               {{ isSubmitting() ? 'Saving...' : 'Save Profile' }}
             </button>
