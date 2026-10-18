@@ -1,7 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ClientStateService } from '../../../core/services/client-state.service';
+import { ClientStateService, FILING_MONTHS } from '../../../core/services/client-state.service';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 
 @Component({
@@ -51,8 +51,6 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
                   </span>
                   <span class="detail-val font-mono fw-bold">{{ p.gstin }}</span>
                 </div>
-
-
               </div>
 
               <!-- Month and Year Selection -->
@@ -193,20 +191,17 @@ export class ClientInfoModalComponent {
   selectedMonth = 'September';
   selectedYear = '2026';
 
-  readonly months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
+  readonly months = FILING_MONTHS;
+
+  constructor() {
+    effect(() => {
+      const p = this.state.pendingProfile() || this.state.activeProfile();
+      if (p) {
+        if (p.month) this.selectedMonth = p.month;
+        if (p.year) this.selectedYear = p.year;
+      }
+    });
+  }
 
   profile() {
     return this.state.pendingProfile() || this.state.activeProfile();

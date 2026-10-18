@@ -18,6 +18,44 @@ export interface ToastMessage {
   type: 'success' | 'error' | 'info' | 'warning';
 }
 
+export const FILING_MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+] as const;
+
+const MONTH_CODE_MAP: Record<string, string> = {
+  January: '01',
+  February: '02',
+  March: '03',
+  April: '04',
+  May: '05',
+  June: '06',
+  July: '07',
+  August: '08',
+  September: '09',
+  October: '10',
+  November: '11',
+  December: '12',
+};
+
+export interface ApplyCombinationResult {
+  changed: boolean;
+  sameGstin: boolean;
+  samePeriod: boolean;
+  period: string;
+  periodCode: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -27,7 +65,7 @@ export class ClientStateService {
 
   // Profiles State
   readonly profiles = signal<GstProfile[]>(INITIAL_PROFILES);
-  readonly activeProfile = signal<GstProfile | null>(INITIAL_PROFILES[1]); // Default to dsdivine13
+  readonly activeProfile = signal<GstProfile | null>(null);
 
   constructor() {
     // Profiles are loaded explicitly via loadProfilesFromBackend() when needed
@@ -38,19 +76,30 @@ export class ClientStateService {
     this.gstApi.getCompanies().subscribe({
       next: (companies) => {
         if (companies && companies.length > 0) {
+          const previousById = new Map(this.profiles().map((p) => [p.id, p]));
+          const active = this.activeProfile();
+
           const mapped: GstProfile[] = companies.map((c, index) => {
-            const code = (c.gstin && c.gstin.length >= 2) ? c.gstin.substring(0, 2) : '09';
+            const code = c.gstin && c.gstin.length >= 2 ? c.gstin.substring(0, 2) : '09';
             let createdOn = '11 Apr 2026';
             if (c.createdAt) {
               try {
                 const date = new Date(c.createdAt);
                 if (!isNaN(date.getTime())) {
-                  createdOn = date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+                  createdOn = date.toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                  });
                 }
               } catch (_) {}
             }
+
+            const id = String(c.id);
+            const prev = active?.id === id ? active : previousById.get(id);
+
             return {
-              id: String(c.id),
+              id,
               sNo: index + 1,
               createdOn,
               companyName: c.companyName,
@@ -60,21 +109,38 @@ export class ClientStateService {
               gstr1Status: 'No',
               gstr3bStatus: 'No',
               username: c.ownerName,
-              period: 'September 2026',
-              periodCode: '092026',
-              year: '2026',
-              month: 'September',
+              period: prev?.period || 'September 2026',
+              periodCode: prev?.periodCode || '092026',
+              year: prev?.year || '2026',
+              month: prev?.month || 'September',
             };
           });
           this.profiles.set(mapped);
-          if (!this.activeProfile() || !mapped.some(p => p.id === this.activeProfile()?.id)) {
-            this.activeProfile.set(mapped[0]);
+
+          const current = this.activeProfile();
+          const matching = current ? mapped.find((p) => p.id === current.id) : undefined;
+          if (!matching) {
+            // No active profile yet — auto-select the first profile as default
+            this.setActiveProfile(mapped[0]);
+          } else if (
+            current &&
+            (matching.gstin !== current.gstin ||
+            matching.companyName !== current.companyName ||
+            matching.ownerName !== current.ownerName)
+          ) {
+            this.setActiveProfile({
+              ...matching,
+              month: current.month,
+              year: current.year,
+              period: current.period,
+              periodCode: current.periodCode,
+            });
           }
         }
       },
       error: (err) => {
         console.warn('Backend /api/companies not reachable yet, using existing profiles:', err);
-      }
+      },
     });
   }
 
@@ -144,7 +210,6 @@ export class ClientStateService {
   readonly isConstantConfigModalOpen = signal<boolean>(false);
   readonly isUploadModalOpen = signal<boolean>(false);
   readonly isStatementModalOpen = signal<boolean>(false);
-  readonly isSwitchClientModalOpen = signal<boolean>(false);
   readonly isSupportModalOpen = signal<boolean>(false);
 
   // Temporary selected profile for modal confirmation
@@ -181,14 +246,16 @@ export class ClientStateService {
         next: () => {
           this.profiles.update((list) => list.filter((p) => p.id !== id));
           if (this.activeProfile()?.id === id) {
-            this.activeProfile.set(this.profiles()[0] || null);
+            const next = this.profiles()[0];
+            if (next) this.setActiveProfile(next); else this.activeProfile.set(null);
           }
           this.showToast('Profile deleted successfully.', 'success');
         },
         error: (err) => {
           this.profiles.update((list) => list.filter((p) => p.id !== id));
           if (this.activeProfile()?.id === id) {
-            this.activeProfile.set(this.profiles()[0] || null);
+            const next = this.profiles()[0];
+            if (next) this.setActiveProfile(next); else this.activeProfile.set(null);
           }
           this.showToast(err.message || 'Profile deleted.', 'info');
         },
@@ -196,7 +263,8 @@ export class ClientStateService {
     } else {
       this.profiles.update((list) => list.filter((p) => p.id !== id));
       if (this.activeProfile()?.id === id) {
-        this.activeProfile.set(this.profiles()[0] || null);
+        const next = this.profiles()[0];
+        if (next) this.setActiveProfile(next); else this.activeProfile.set(null);
       }
       this.showToast('Profile deleted successfully.', 'info');
     }
@@ -215,6 +283,57 @@ export class ClientStateService {
     });
   }
 
+  buildPeriod(month: string, year: string): { period: string; periodCode: string } {
+    const monthCode = MONTH_CODE_MAP[month] || '09';
+    return {
+      period: `${month} ${year}`,
+      periodCode: `${monthCode}${year}`,
+    };
+  }
+
+  combinationKey(gstin: string, periodCode: string): string {
+    return `${(gstin || '').trim().toUpperCase()}|${periodCode || ''}`;
+  }
+
+  currentCombinationKey(): string {
+    const info = this.clientInfo();
+    const active = this.activeProfile();
+    const gstin = active?.gstin || info.gstin;
+    const periodCode = active?.periodCode || info.periodCode;
+    return this.combinationKey(gstin, periodCode);
+  }
+
+  /**
+   * Applies GSTIN + filing-period combination.
+   * Clears converted GSTR-1 only when GSTIN or period actually changes.
+   */
+  applyClientCombination(profile: GstProfile, month: string, year: string): ApplyCombinationResult {
+    const { period, periodCode } = this.buildPeriod(month, year);
+    const prev = this.clientInfo();
+    const sameGstin = (prev.gstin || '').trim().toUpperCase() === (profile.gstin || '').trim().toUpperCase();
+    const samePeriod = prev.periodCode === periodCode;
+    const changed = !sameGstin || !samePeriod;
+
+    const updated: GstProfile = {
+      ...profile,
+      month,
+      year,
+      period,
+      periodCode,
+    };
+
+    this.profiles.update((list) =>
+      list.map((p) => (p.id === updated.id ? { ...p, month, year, period, periodCode } : p)),
+    );
+    this.setActiveProfile(updated);
+
+    if (changed) {
+      this.gstr1Payload.set(null);
+    }
+
+    return { changed, sameGstin, samePeriod, period, periodCode };
+  }
+
   openClientInfoModal(profile: GstProfile): void {
     this.pendingProfile.set(profile);
     this.isClientInfoModalOpen.set(true);
@@ -229,39 +348,14 @@ export class ClientStateService {
     const profile = this.pendingProfile() || this.activeProfile();
     if (!profile) return;
 
-    const monthMap: Record<string, string> = {
-      January: '01',
-      February: '02',
-      March: '03',
-      April: '04',
-      May: '05',
-      June: '06',
-      July: '07',
-      August: '08',
-      September: '09',
-      October: '10',
-      November: '11',
-      December: '12',
-    };
-
-    const monthCode = monthMap[month] || '09';
-    const periodCode = `${monthCode}${year}`;
-    const periodDisplay = `${month} ${year}`;
-
-    const updatedProfile: GstProfile = {
-      ...profile,
-      month,
-      year,
-      period: periodDisplay,
-      periodCode,
-    };
-
-    this.setActiveProfile(updatedProfile);
+    this.applyClientCombination(profile, month, year);
     this.closeClientInfoModal();
-    this.showToast(`Selected ${profile.companyName} for ${periodDisplay}. Proceeding to Import...`, 'success');
+    this.showToast(`Selected ${profile.companyName} for ${month} ${year}.`, 'success');
 
-    // Navigate to Import Dashboard
-    this.router.navigate(['/app/dashboard/import']);
+    const currentUrl = this.router.url;
+    if (!currentUrl.includes('/app/dashboard/import')) {
+      this.router.navigate(['/app/dashboard/import']);
+    }
   }
 
   updateConstantConfig(config: Partial<ConstantConfig>): void {
@@ -301,14 +395,6 @@ export class ClientStateService {
 
   closeConstantConfigModal(): void {
     this.isConstantConfigModalOpen.set(false);
-  }
-
-  openSwitchClientModal(): void {
-    this.isSwitchClientModalOpen.set(true);
-  }
-
-  closeSwitchClientModal(): void {
-    this.isSwitchClientModalOpen.set(false);
   }
 
   openSupportModal(): void {

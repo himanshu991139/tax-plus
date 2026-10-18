@@ -61,11 +61,11 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
       <!-- Right: Active Profile Pill & User Menu -->
       <div class="header-right">
         @if (state.activeProfile(); as active) {
-          <div class="active-profile-pill" (click)="state.openClientInfoModal(active)" title="Click to change period">
+          <a class="active-profile-pill" routerLink="/app/dashboard/import" title="Go to Import page">
             <span class="pill-dot"></span>
             <span class="pill-client">{{ active.companyName }}</span>
             <span class="pill-period">({{ active.period }})</span>
-          </div>
+          </a>
         }
 
         <div class="user-profile" (click)="toggleUserMenu()">
@@ -279,6 +279,8 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
         .pill-period {
           color: #94a3b8;
         }
+
+        text-decoration: none;
       }
 
       .user-profile {

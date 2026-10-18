@@ -6,7 +6,6 @@ import { ClientStateService } from '../../core/services/client-state.service';
 import { GstProfile } from '../../core/models/client-info.model';
 import { IconComponent } from '../../shared/components/icon/icon.component';
 import { AddProfileModalComponent } from '../modals/add-profile-modal/add-profile-modal.component';
-import { ConstantConfigModalComponent } from '../modals/constant-config-modal/constant-config-modal.component';
 
 @Component({
   selector: 'app-profiles',
@@ -16,7 +15,6 @@ import { ConstantConfigModalComponent } from '../modals/constant-config-modal/co
     FormsModule,
     IconComponent,
     AddProfileModalComponent,
-    ConstantConfigModalComponent,
   ],
   template: `
     <div class="profiles-page">
@@ -208,9 +206,8 @@ import { ConstantConfigModalComponent } from '../modals/constant-config-modal/co
         </div>
       </div>
 
-      <!-- Modals (SupportWidget & ClientInfoModal from root app-root) -->
+      <!-- Modals -->
       <app-add-profile-modal></app-add-profile-modal>
-      <app-constant-config-modal></app-constant-config-modal>
     </div>
   `,
   styles: [
@@ -579,7 +576,7 @@ export class ProfilesComponent implements OnInit {
   }
 
   proceedToImport(profile: GstProfile): void {
-    // Open month/year confirmation dialog as shown in Image 3
+    // Open month/year confirmation dialog to select filing period
     this.state.openClientInfoModal(profile);
   }
 

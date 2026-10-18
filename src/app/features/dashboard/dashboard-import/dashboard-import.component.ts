@@ -5,7 +5,6 @@ import { ClientHeaderComponent } from '../client-header/client-header.component'
 import { PlatformGridComponent } from '../platform-grid/platform-grid.component';
 import { UploadModalComponent } from '../../modals/upload-modal/upload-modal.component';
 import { StatementModalComponent } from '../../modals/statement-modal/statement-modal.component';
-import { SwitchClientModalComponent } from '../../modals/switch-client-modal/switch-client-modal.component';
 import { ClientStateService } from '../../../core/services/client-state.service';
 
 @Component({
@@ -17,24 +16,18 @@ import { ClientStateService } from '../../../core/services/client-state.service'
     PlatformGridComponent,
     UploadModalComponent,
     StatementModalComponent,
-    SwitchClientModalComponent,
   ],
   template: `
     <div class="dashboard-import-page">
       <!-- Client Header Bar -->
       <app-client-header></app-client-header>
 
-      <!-- Platform Search & Filters - Hidden
-      <app-platform-filter></app-platform-filter>
-      -->
-
       <!-- Platform Cards Grid -->
       <app-platform-grid></app-platform-grid>
 
-      <!-- Modals (root-level SupportWidget & ClientInfoModal inherited from app-root) -->
+      <!-- Modals -->
       <app-upload-modal></app-upload-modal>
       <app-statement-modal></app-statement-modal>
-      <app-switch-client-modal></app-switch-client-modal>
     </div>
   `,
   styles: [

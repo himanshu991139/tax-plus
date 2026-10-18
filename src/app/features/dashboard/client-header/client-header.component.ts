@@ -1,6 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 import { ClientStateService } from '../../../core/services/client-state.service';
 import { GstApiService } from '../../../core/services/gst-api.service';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
@@ -8,7 +9,7 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
 @Component({
   selector: 'app-client-header',
   standalone: true,
-  imports: [CommonModule, RouterModule, IconComponent],
+  imports: [CommonModule, FormsModule, RouterModule, IconComponent],
   template: `
     <div class="client-header-container">
       <!-- Back Link & Title Row -->
@@ -36,6 +37,7 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
       <!-- Client Info Card -->
       <div class="client-info-card">
         <div class="client-meta-grid">
+
           <!-- Company -->
           <div class="meta-item">
             <div class="meta-icon-col">
@@ -59,7 +61,7 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
           </div>
 
           <!-- GSTIN -->
-          <div class="meta-item gstin-item">
+          <div class="meta-item">
             <div class="meta-icon-col">
               <app-icon name="id-card" [size]="18"></app-icon>
             </div>
@@ -69,17 +71,36 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
             </div>
           </div>
 
+          <!-- Filing Period — read-only display from selected profile -->
+          <div class="meta-item">
+            <div class="meta-icon-col">
+              <app-icon name="calendar" [size]="18"></app-icon>
+            </div>
+            <div class="meta-text-col">
+              <div class="meta-label">Filing Period</div>
+              <div class="period-selectors">
+                <select
+                  class="period-select"
+                  [ngModel]="selectedMonth()"
+                  disabled
+                >
+                  <option [value]="selectedMonth()">{{ selectedMonth() }}</option>
+                </select>
+                <select
+                  class="period-select year-select"
+                  [ngModel]="selectedYear()"
+                  disabled
+                >
+                  <option [value]="selectedYear()">{{ selectedYear() }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
 
         </div>
-
-        <!-- Switch Client Action Button -->
-        <button type="button" class="btn-switch-client" (click)="state.openSwitchClientModal()">
-          <app-icon name="switch" [size]="14"></app-icon>
-          <span>Switch Client</span>
-        </button>
       </div>
 
-      <!-- Action Row: View Statement & Generate & Download GSTR-1 -->
+      <!-- Action Row -->
       <div class="action-row">
         <button
           type="button"
@@ -101,7 +122,7 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
           [title]="state.gstr1Payload() ? 'Download generated GSTR-1 JSON' : 'Submit platform data first to enable GSTR-1 download'"
         >
           <app-icon name="download" [size]="15"></app-icon>
-          <span>Generate & Download GSTR-1</span>
+          <span>Generate &amp; Download GSTR-1</span>
         </button>
       </div>
     </div>
@@ -180,7 +201,7 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
       .client-meta-grid {
         display: flex;
         align-items: center;
-        gap: 28px;
+        gap: 24px;
         flex-wrap: wrap;
         flex: 1;
       }
@@ -221,26 +242,42 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
         }
       }
 
-      .btn-switch-client {
-        background: #ffffff;
-        border: 1px solid #cbd5e1;
-        color: #334155;
-        border-radius: 6px;
-        padding: 7px 14px;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        display: inline-flex;
+      .period-selectors {
+        display: flex;
         align-items: center;
-        gap: 6px;
-        transition: all 0.15s ease-in-out;
-        white-space: nowrap;
+        gap: 5px;
+        margin-top: 3px;
+      }
 
-        &:hover {
-          background: #f8fafc;
-          border-color: #64748b;
-          color: #0f172a;
+      .period-select {
+        height: 28px;
+        padding: 0 6px;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #0f172a;
+        background: #f8fafc;
+        cursor: not-allowed;
+        transition: border-color 0.15s;
+
+        &:disabled {
+          background-color: #f1f5f9;
+          border-color: #e2e8f0;
+          color: #334155;
+          opacity: 0.9;
+          cursor: not-allowed;
         }
+
+        &:focus {
+          outline: none;
+          border-color: #6366f1;
+          box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+        }
+      }
+
+      .year-select {
+        width: 70px;
       }
 
       .action-row {
@@ -316,6 +353,15 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
 export class ClientHeaderComponent {
   readonly state = inject(ClientStateService);
   private readonly gstApi = inject(GstApiService);
+  private readonly router = inject(Router);
+
+  readonly selectedMonth = computed(() => {
+    return this.state.activeProfile()?.month || 'September';
+  });
+
+  readonly selectedYear = computed(() => {
+    return this.state.activeProfile()?.year || '2026';
+  });
 
   downloadGstr1(): void {
     const payload = this.state.gstr1Payload();
