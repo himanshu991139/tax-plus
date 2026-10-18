@@ -68,57 +68,7 @@ export const INITIAL_CONSTANT_CONFIG: ConstantConfig = {
 };
 
 export const INITIAL_PROFILES: GstProfile[] = [
-  {
-    id: 'p1',
-    sNo: 1,
-    createdOn: '16 Apr 2026',
-    companyName: 'harsh',
-    ownerName: 'harsh',
-    gstin: '09OYVPS2177B1ZJ',
-    sellerStateCode: '09',
-    gstr1Status: 'No',
-    gstr3bStatus: 'No',
-    username: 'harsh_seller',
-    period: 'September 2026',
-    periodCode: '092026',
-    year: '2026',
-    month: 'September',
-    history: { aug26: 'pending', sept26: 'pending' },
-  },
-  {
-    id: 'p2',
-    sNo: 2,
-    createdOn: '11 Apr 2026',
-    companyName: 'dsdivine13',
-    ownerName: 'dsdivine13',
-    gstin: '09OYVPS2177B2ZI',
-    sellerStateCode: '09',
-    gstr1Status: 'Yes',
-    gstr3bStatus: 'No',
-    username: 'dsdivine_gst',
-    period: 'September 2026',
-    periodCode: '092026',
-    year: '2026',
-    month: 'September',
-    history: { aug26: 'pending', sept26: 'filed' },
-  },
-  {
-    id: 'p3',
-    sNo: 3,
-    createdOn: '11 Apr 2026',
-    companyName: 'xcleani',
-    ownerName: 'xcleani',
-    gstin: '09CDQPT2928D1Z3',
-    sellerStateCode: '09',
-    gstr1Status: 'No',
-    gstr3bStatus: 'No',
-    username: 'xcleani_tax',
-    period: 'September 2026',
-    periodCode: '092026',
-    year: '2026',
-    month: 'September',
-    history: { aug26: 'pending', sept26: 'pending' },
-  },
+ 
 ];
 
 export const DEFAULT_CLIENT: ClientInfo = {
