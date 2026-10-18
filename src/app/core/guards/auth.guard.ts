@@ -8,11 +8,11 @@ export const authGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
 
   // If already authenticated in memory
-  if (authService.isAuthenticated()) {
+  if (authService.currentUser()?.authenticated) {
     return true;
   }
 
-  // Otherwise check session status with backend
+  // Check auth status with backend (also reads token from URL or localStorage)
   return authService.checkAuthStatus().pipe(
     map((user) => {
       if (user && user.authenticated) {
