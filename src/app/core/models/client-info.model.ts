@@ -16,6 +16,8 @@ export interface CompanyEntity {
   companyName: string;
   ownerName: string;
   gstin: string;
+  isDefault?: boolean;
+  default?: boolean;
   createdAt?: string;
 }
 
@@ -33,6 +35,7 @@ export interface GstProfile {
   ownerName: string;
   gstin: string;
   sellerStateCode: string;
+  isDefault?: boolean;
   gstr1Status: 'Yes' | 'No';
   gstr3bStatus: 'Yes' | 'No';
   username?: string;

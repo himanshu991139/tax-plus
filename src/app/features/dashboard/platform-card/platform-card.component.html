@@ -1,0 +1,33 @@
+    <div class="platform-card">
+      <!-- Card Header Banner -->
+      <div class="card-header">
+        <span class="type-badge">{{ platform().badge }}</span>
+        <span class="frequency-label">{{ platform().filingFrequency }}</span>
+      </div>
+
+      <!-- Card Body -->
+      <div class="card-body">
+        <!-- Logo -->
+        <div class="logo-wrapper">
+          <app-platform-logo [platform]="platform().logoType"></app-platform-logo>
+        </div>
+
+        <!-- Platform Title -->
+        <h3 class="platform-title">{{ platform().name }}</h3>
+
+        @if (platform().tagline) {
+          <p class="platform-tagline">{{ platform().tagline }}</p>
+        }
+
+        <!-- Upload Button -->
+        <button
+          type="button"
+          class="btn-upload"
+          (click)="onUploadClick()"
+          [title]="platform().hasApiIntegration ? 'Upload and Convert Reports' : 'Upload Data for ' + platform().name"
+        >
+          <app-icon name="cloud-upload" [size]="16"></app-icon>
+          <span>Upload Data</span>
+        </button>
+      </div>
+    </div>

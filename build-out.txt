@@ -1,12 +1,12 @@
 ❯ Building...
 ✔ Building...
 Initial chunk files | Names         |  Raw size | Estimated transfer size
-main-LEFXW3S4.js    | main          | 582.94 kB |               136.15 kB
-styles-X2AY6N5F.css | styles        | 421.80 kB |                41.24 kB
+main-ODHV37L7.js    | main          | 599.18 kB |               138.34 kB
+styles-CHSNDD6S.css | styles        | 421.95 kB |                41.42 kB
 
-                    | Initial total |   1.00 MB |               177.39 kB
+                    | Initial total |   1.02 MB |               179.76 kB
 
-Application bundle generation complete. [5.437 seconds] - 2026-10-18T07:58:43.510Z
+Application bundle generation complete. [7.305 seconds] - 2026-10-18T09:43:55.255Z
 
 Output location: D:\ui\dist\gst-proseller-ui
 

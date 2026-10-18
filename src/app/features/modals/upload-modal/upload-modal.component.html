@@ -1,0 +1,167 @@
+    @if (state.isUploadModalOpen()) {
+      <div class="modal-overlay" (click)="onBackdropClick($event)">
+        <div class="modal-dialog-custom" (click)="$event.stopPropagation()">
+          <!-- Modal Header -->
+          <div class="modal-header-custom">
+            <div class="header-left-col">
+              <div class="modal-platform-badge">
+                <app-platform-logo [platform]="currentPlatformLogo()" class="header-mini-logo"></app-platform-logo>
+                <div>
+                  <h2 class="modal-title">
+                    Import {{ state.selectedPlatform()?.name || 'Platform' }} Data
+                  </h2>
+                  <div class="modal-subtitle">
+                    Filing Period: <strong>{{ state.clientInfo().period }}</strong> | GSTIN:
+                    <span class="font-mono">{{ state.clientInfo().gstin }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button type="button" class="btn-close-custom" (click)="state.closeUploadModal()" aria-label="Close">
+              <app-icon name="x" [size]="18"></app-icon>
+            </button>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="modal-body-custom">
+            @if (errorMessage()) {
+              <div class="alert alert-danger d-flex align-items-center gap-2 mb-3" role="alert">
+                <app-icon name="alert" [size]="18"></app-icon>
+                <div class="flex-grow-1">{{ errorMessage() }}</div>
+                <button type="button" class="btn-close" (click)="errorMessage.set(null)"></button>
+              </div>
+            }
+
+
+            <!-- Upload File Inputs -->
+            <div class="file-dropzone-group">
+              <!-- File 1: TCS Sales (Required) -->
+              <div class="dropzone-box" [class.has-file]="salesFile()">
+                <div class="dropzone-header">
+                  <div class="dropzone-title">
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle me-1">Required</span>
+                    <strong>TCS Sales Report</strong> (.xlsx or .csv)
+                  </div>
+                  <small class="text-muted">Meesho forward orders report (tcs_sales.csv/xlsx)</small>
+                </div>
+
+                @if (salesFile(); as file) {
+                  <div class="selected-file-pill">
+                    <div class="d-flex align-items-center gap-2">
+                      <app-icon name="excel" [size]="20" class="text-success"></app-icon>
+                      <span class="file-name">{{ file.name }}</span>
+                      <span class="file-size text-muted">({{ formatBytes(file.size) }})</span>
+                    </div>
+                    <button type="button" class="btn-remove-file" (click)="salesFile.set(null)">
+                      <app-icon name="x" [size]="14"></app-icon>
+                    </button>
+                  </div>
+                } @else {
+                  <label class="file-picker-label">
+                    <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event, 'sales')" />
+                    <app-icon name="cloud-upload" [size]="22" class="text-primary"></app-icon>
+                    <span>Click or drag to choose <strong>tcs_sales</strong> file</span>
+                  </label>
+                }
+              </div>
+
+              <!-- File 2: TCS Sales Return (Required) -->
+              <div class="dropzone-box mt-3" [class.has-file]="returnFile()">
+                <div class="dropzone-header">
+                  <div class="dropzone-title">
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle me-1">Required</span>
+                    <strong>TCS Sales Return Report</strong> (.xlsx or .csv)
+                  </div>
+                  <small class="text-muted">Customer returns & RTOs report (tcs_sales_return.csv/xlsx)</small>
+                </div>
+
+                @if (returnFile(); as file) {
+                  <div class="selected-file-pill">
+                    <div class="d-flex align-items-center gap-2">
+                      <app-icon name="excel" [size]="20" class="text-warning"></app-icon>
+                      <span class="file-name">{{ file.name }}</span>
+                      <span class="file-size text-muted">({{ formatBytes(file.size) }})</span>
+                    </div>
+                    <button type="button" class="btn-remove-file" (click)="returnFile.set(null)">
+                      <app-icon name="x" [size]="14"></app-icon>
+                    </button>
+                  </div>
+                } @else {
+                  <label class="file-picker-label">
+                    <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event, 'return')" />
+                    <app-icon name="cloud-upload" [size]="22" class="text-secondary"></app-icon>
+                    <span>Click or drag to choose <strong>tcs_sales_return</strong> file</span>
+                  </label>
+                }
+              </div>
+
+              <!-- File 3: Tax Invoice Details (Required) -->
+              <div class="dropzone-box mt-3" [class.has-file]="invoiceFile()">
+                <div class="dropzone-header">
+                  <div class="dropzone-title">
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle me-1">Required</span>
+                    <strong>Tax Invoice Details Report</strong> (.xlsx or .csv)
+                  </div>
+                  <small class="text-muted">Tax invoice document series report (tax_invoice_details.csv/xlsx)</small>
+                </div>
+
+                @if (invoiceFile(); as file) {
+                  <div class="selected-file-pill">
+                    <div class="d-flex align-items-center gap-2">
+                      <app-icon name="csv" [size]="20" class="text-info"></app-icon>
+                      <span class="file-name">{{ file.name }}</span>
+                      <span class="file-size text-muted">({{ formatBytes(file.size) }})</span>
+                    </div>
+                    <button type="button" class="btn-remove-file" (click)="invoiceFile.set(null)">
+                      <app-icon name="x" [size]="14"></app-icon>
+                    </button>
+                  </div>
+                } @else {
+                  <label class="file-picker-label">
+                    <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event, 'invoice')" />
+                    <app-icon name="cloud-upload" [size]="22" class="text-secondary"></app-icon>
+                    <span>Click or drag to choose <strong>tax_invoice_details</strong> file</span>
+                  </label>
+                }
+              </div>
+            </div>
+
+            @if (isSubmitting()) {
+              <div class="mt-3">
+                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                <div class="text-center mt-2 small text-primary fw-semibold">
+                  Uploading reports and converting to GSTR-1...
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="modal-footer-custom">
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              (click)="state.closeUploadModal()"
+              [disabled]="isSubmitting()"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary-navy d-flex align-items-center gap-2"
+              (click)="submitConversion()"
+              [disabled]="!salesFile() || !returnFile() || !invoiceFile() || isSubmitting()"
+            >
+              @if (isSubmitting()) {
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span>Submitting...</span>
+              } @else {
+                <app-icon name="check" [size]="16"></app-icon>
+                <span>Submit</span>
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    }

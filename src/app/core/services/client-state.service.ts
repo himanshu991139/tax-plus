@@ -66,6 +66,9 @@ export class ClientStateService {
   // Profiles State
   readonly profiles = signal<GstProfile[]>(INITIAL_PROFILES);
   readonly activeProfile = signal<GstProfile | null>(null);
+  readonly defaultProfile = computed<GstProfile | null>(() => {
+    return this.profiles().find((p) => p.isDefault) || null;
+  });
 
   constructor() {
     // Profiles are loaded explicitly via loadProfilesFromBackend() when needed
@@ -97,6 +100,7 @@ export class ClientStateService {
 
             const id = String(c.id);
             const prev = active?.id === id ? active : previousById.get(id);
+            const isDef = Boolean(c.isDefault ?? c.default);
 
             return {
               id,
@@ -106,6 +110,7 @@ export class ClientStateService {
               ownerName: c.ownerName,
               gstin: c.gstin,
               sellerStateCode: code,
+              isDefault: isDef,
               gstr1Status: 'No',
               gstr3bStatus: 'No',
               username: c.ownerName,
@@ -119,14 +124,18 @@ export class ClientStateService {
 
           const current = this.activeProfile();
           const matching = current ? mapped.find((p) => p.id === current.id) : undefined;
+          const defaultProf = mapped.find((p) => p.isDefault);
+
           if (!matching) {
-            // No active profile yet — auto-select the first profile as default
-            this.setActiveProfile(mapped[0]);
+            // Pick default profile first; if none marked as default, pick the first profile
+            const toSelect = defaultProf || mapped[0];
+            this.setActiveProfile(toSelect);
           } else if (
             current &&
             (matching.gstin !== current.gstin ||
             matching.companyName !== current.companyName ||
-            matching.ownerName !== current.ownerName)
+            matching.ownerName !== current.ownerName ||
+            matching.isDefault !== current.isDefault)
           ) {
             this.setActiveProfile({
               ...matching,
@@ -136,6 +145,9 @@ export class ClientStateService {
               periodCode: current.periodCode,
             });
           }
+        } else {
+          this.profiles.set([]);
+          this.activeProfile.set(null);
         }
       },
       error: (err) => {
@@ -281,6 +293,42 @@ export class ClientStateService {
       year: profile.year,
       sellerStateCode: profile.sellerStateCode,
     });
+  }
+
+  setDefaultProfile(profile: GstProfile): void {
+    const updatedProfile: GstProfile = {
+      ...profile,
+      isDefault: true,
+    };
+
+    // Immediately select this profile as active across all pages
+    this.setActiveProfile(updatedProfile);
+
+    const isBackendId = !isNaN(Number(profile.id));
+    if (isBackendId) {
+      this.gstApi.setDefaultCompany(profile.id).subscribe({
+        next: () => {
+          this.profiles.update((list) =>
+            list.map((p) => ({
+              ...p,
+              isDefault: p.id === profile.id,
+            }))
+          );
+          this.showToast(`"${profile.companyName}" set as default and active profile.`, 'success');
+        },
+        error: (err) => {
+          this.showToast(err.message || 'Failed to update default profile.', 'error');
+        },
+      });
+    } else {
+      this.profiles.update((list) =>
+        list.map((p) => ({
+          ...p,
+          isDefault: p.id === profile.id,
+        }))
+      );
+      this.showToast(`"${profile.companyName}" set as default and active profile.`, 'success');
+    }
   }
 
   buildPeriod(month: string, year: string): { period: string; periodCode: string } {

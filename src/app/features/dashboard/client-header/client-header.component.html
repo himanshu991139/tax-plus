@@ -1,0 +1,120 @@
+    <div class="client-header-container">
+      <!-- Back Link & Title Row -->
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <a routerLink="/app/profiles" class="back-link">
+          <app-icon name="chevron-down" [size]="14" customClass="rotate-left"></app-icon>
+          <span>Back to Manage GST Profiles</span>
+        </a>
+        <span class="badge bg-light text-secondary border">Filing Dashboard</span>
+      </div>
+
+      <div class="page-title-row">
+        <h1 class="page-title">
+          <span class="title-cloud-icon">
+            <app-icon name="cloud-upload" [size]="24"></app-icon>
+          </span>
+          <span>Import Data from Platform</span>
+        </h1>
+        <p class="page-subtitle">
+          <app-icon name="info" [size]="15" customClass="info-icon"></app-icon>
+          <span>Upload platform sales reports, view verified statement, and generate GSTR-1 JSON.</span>
+        </p>
+      </div>
+
+      <!-- Client Info Card -->
+      <div class="client-info-card">
+        <div class="client-meta-grid">
+
+          <!-- Company -->
+          <div class="meta-item">
+            <div class="meta-icon-col">
+              <app-icon name="building" [size]="18"></app-icon>
+            </div>
+            <div class="meta-text-col">
+              <div class="meta-label">Company</div>
+              <div class="meta-value d-flex align-items-center gap-2">
+                <span>{{ state.clientInfo().company }}</span>
+                @if (state.activeProfile()?.isDefault) {
+                  <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill" style="font-size: 10px; font-weight: 700; padding: 2px 7px;">Default Profile</span>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Client -->
+          <div class="meta-item">
+            <div class="meta-icon-col">
+              <app-icon name="user" [size]="18"></app-icon>
+            </div>
+            <div class="meta-text-col">
+              <div class="meta-label">Client</div>
+              <div class="meta-value">{{ state.clientInfo().client }}</div>
+            </div>
+          </div>
+
+          <!-- GSTIN -->
+          <div class="meta-item">
+            <div class="meta-icon-col">
+              <app-icon name="id-card" [size]="18"></app-icon>
+            </div>
+            <div class="meta-text-col">
+              <div class="meta-label">GSTIN</div>
+              <div class="meta-value font-mono">{{ state.clientInfo().gstin }}</div>
+            </div>
+          </div>
+
+          <!-- Filing Period — read-only display from selected profile -->
+          <div class="meta-item">
+            <div class="meta-icon-col">
+              <app-icon name="calendar" [size]="18"></app-icon>
+            </div>
+            <div class="meta-text-col">
+              <div class="meta-label">Filing Period</div>
+              <div class="period-selectors">
+                <select
+                  class="period-select"
+                  [ngModel]="selectedMonth()"
+                  disabled
+                >
+                  <option [value]="selectedMonth()">{{ selectedMonth() }}</option>
+                </select>
+                <select
+                  class="period-select year-select"
+                  [ngModel]="selectedYear()"
+                  disabled
+                >
+                  <option [value]="selectedYear()">{{ selectedYear() }}</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Action Row -->
+      <div class="action-row">
+        <button
+          type="button"
+          class="btn-view-statement"
+          (click)="state.openStatementModal()"
+        >
+          <app-icon name="file-text" [size]="15"></app-icon>
+          <span>View Statement</span>
+          @if (state.gstr1Payload()) {
+            <span class="statement-ready-dot" title="Data generated from backend"></span>
+          }
+        </button>
+
+        <button
+          type="button"
+          class="btn-download-gstr1"
+          (click)="downloadGstr1()"
+          [disabled]="!state.gstr1Payload()"
+          [title]="state.gstr1Payload() ? 'Download generated GSTR-1 JSON' : 'Submit platform data first to enable GSTR-1 download'"
+        >
+          <app-icon name="download" [size]="15"></app-icon>
+          <span>Generate &amp; Download GSTR-1</span>
+        </button>
+      </div>
+    </div>

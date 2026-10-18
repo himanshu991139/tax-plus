@@ -1,0 +1,18 @@
+    @if (state.filteredPlatforms().length > 0) {
+      <div class="platforms-grid">
+        @for (platform of state.filteredPlatforms(); track platform.id) {
+          @if (platform.id === 'meesho-b2c') {
+            <app-platform-card [platform]="platform"></app-platform-card>
+          }
+        }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <div class="empty-icon-box">
+          <app-icon name="search" [size]="32"></app-icon>
+        </div>
+        <h3 class="empty-title">No platforms found</h3>
+        <p class="empty-desc">No platform matched your filter criteria. Try adjusting your search or filter options.</p>
+        <button type="button" class="btn-reset" (click)="state.clearFilters()">Reset Filters</button>
+      </div>
+    }

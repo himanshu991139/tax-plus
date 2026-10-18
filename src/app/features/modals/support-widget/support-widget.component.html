@@ -1,0 +1,70 @@
+    <!-- Support Modal Dialog -->
+    @if (state.isSupportModalOpen()) {
+      <div class="modal-overlay" (click)="onBackdropClick($event)">
+        <div class="modal-dialog-custom" (click)="$event.stopPropagation()">
+          <div class="modal-header-custom">
+            <div class="d-flex align-items-center gap-2">
+              <app-icon name="support" [size]="18" class="text-white"></app-icon>
+              <h3 class="m-0 fs-5 fw-bold text-white">Raise a Support Ticket</h3>
+            </div>
+            <button type="button" class="btn-close-custom" (click)="state.closeSupportModal()" aria-label="Close">
+              <app-icon name="x" [size]="18"></app-icon>
+            </button>
+          </div>
+
+          <div class="modal-body-custom">
+            @if (ticketSubmitted()) {
+              <div class="text-center py-4">
+                <div class="success-icon-badge mx-auto mb-3">
+                  <app-icon name="check" [size]="28"></app-icon>
+                </div>
+                <h4 class="fw-bold text-success">Ticket Submitted Successfully!</h4>
+                <p class="text-muted small">
+                  Ticket ID: <strong>#TKT-{{ ticketId() }}</strong><br />
+                  Our GST compliance team will review your report within 2-4 hours.
+                </p>
+                <button type="button" class="btn btn-primary-navy btn-sm" (click)="state.closeSupportModal(); ticketSubmitted.set(false)">
+                  Done
+                </button>
+              </div>
+            } @else {
+              <div class="mb-3">
+                <label class="form-label small fw-semibold text-muted">Issue Category</label>
+                <select class="form-select" [(ngModel)]="category">
+                  <option value="meesho_conversion">Meesho GSTR-1 Conversion Error</option>
+                  <option value="tax_mismatch">Table 7 (B2CS) Tax Netting Mismatch</option>
+                  <option value="missing_hsn">Table 12 HSN Code Missing</option>
+                  <option value="general">General Support / Feature Request</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label small fw-semibold text-muted">Subject</label>
+                <input type="text" class="form-control" [(ngModel)]="subject" placeholder="e.g. Issue converting September 2026 reports" />
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label small fw-semibold text-muted">Description / Details</label>
+                <textarea
+                  class="form-control"
+                  rows="4"
+                  [(ngModel)]="description"
+                  placeholder="Describe what occurred, any specific error message, or invoice series details..."
+                ></textarea>
+              </div>
+            }
+          </div>
+
+          @if (!ticketSubmitted()) {
+            <div class="modal-footer-custom">
+              <button type="button" class="btn btn-outline-secondary" (click)="state.closeSupportModal()">
+                Cancel
+              </button>
+              <button type="button" class="btn btn-primary-navy" (click)="submitTicket()" [disabled]="!subject.trim()">
+                Submit Ticket
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    }

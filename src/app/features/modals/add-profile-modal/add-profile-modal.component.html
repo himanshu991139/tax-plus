@@ -1,0 +1,111 @@
+    @if (state.isAddProfileModalOpen()) {
+      <div class="modal-overlay" (click)="onBackdropClick($event)">
+        <div class="modal-dialog-custom" (click)="$event.stopPropagation()">
+          <!-- Modal Header -->
+          <div class="modal-header-brand">
+            <div class="d-flex align-items-center gap-2">
+              <div class="header-icon-circle">
+                <app-icon name="building" [size]="18"></app-icon>
+              </div>
+              <h3 class="m-0 fs-5 fw-bold text-white">Add New GST Profile</h3>
+            </div>
+            <button type="button" class="btn-close-white" (click)="state.closeAddProfileModal()" aria-label="Close">
+              <app-icon name="x" [size]="18"></app-icon>
+            </button>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="modal-body-custom">
+            <!-- GSTIN Field -->
+            <div class="mb-3">
+              <label class="form-label fw-bold small text-dark d-flex align-items-center gap-1">
+                <app-icon name="id-card" [size]="15" class="text-primary"></app-icon>
+                <span>GSTIN :</span>
+              </label>
+              <input
+                type="text"
+                class="form-control font-mono text-uppercase"
+                placeholder="ENTER GSTIN OF THE CLIENT (E.G. 09AAACO4007A1Z3)"
+                maxlength="15"
+                [(ngModel)]="gstin"
+                (ngModelChange)="onGstinChange($event)"
+              />
+              <div class="form-text text-danger small mt-1">
+                Please ensure the GSTIN is entered correctly. Once added, it cannot be modified.
+              </div>
+              @if (detectedState()) {
+                <div class="detected-state-pill mt-1">
+                  <span>State Detected: <strong>{{ detectedState() }} (Code {{ stateCode() }})</strong></span>
+                </div>
+              }
+            </div>
+
+            <!-- Company Name -->
+            <div class="mb-3">
+              <label class="form-label fw-bold small text-dark d-flex align-items-center gap-1">
+                <app-icon name="building" [size]="15" class="text-primary"></app-icon>
+                <span>Company Name :</span>
+              </label>
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Enter the Company of the Client"
+                [(ngModel)]="companyName"
+              />
+            </div>
+
+            <!-- Owner Name -->
+            <div class="mb-3">
+              <label class="form-label fw-bold small text-dark d-flex align-items-center gap-1">
+                <app-icon name="user" [size]="15" class="text-primary"></app-icon>
+                <span>Owner Name :</span>
+              </label>
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Enter the Name of the Client"
+                [(ngModel)]="ownerName"
+              />
+            </div>
+
+
+            
+
+            <!-- GST Username -->
+            <div class="mb-3">
+              <label class="form-label fw-bold small text-dark d-flex align-items-center gap-1">
+                <app-icon name="user" [size]="15" class="text-primary"></app-icon>
+                <span>GST Username :</span>
+              </label>
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Enter GST Username"
+                [(ngModel)]="gstUsername"
+              />
+             
+            </div>
+
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="modal-footer-custom">
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              (click)="state.closeAddProfileModal()"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="btn btn-brand-indigo"
+              (click)="saveProfile()"
+              [disabled]="!gstin || !companyName || isSubmitting()"
+            >
+              {{ isSubmitting() ? 'Saving...' : 'Save Profile' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }

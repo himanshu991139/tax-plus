@@ -71,15 +71,24 @@ body {
 .app-container {
   display: flex;
   height: calc(100vh - 64px);
+  position: relative;
 }
 
 .main-content-area {
   flex: 1;
-  padding: 28px 36px 60px;
+  padding: 16px 16px 48px;
   max-width: 1600px;
   overflow-x: hidden;
   overflow-y: auto;
   height: 100%;
+
+  @media (min-width: 768px) {
+    padding: 24px 28px 60px;
+  }
+
+  @media (min-width: 1200px) {
+    padding: 28px 36px 60px;
+  }
 }
 
 /* Premium Buttons */

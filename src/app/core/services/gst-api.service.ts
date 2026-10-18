@@ -71,6 +71,25 @@ export class GstApiService {
   }
 
   /**
+   * Sets a company as the default profile via PUT /api/companies/{id}/default
+   */
+  setDefaultCompany(id: number | string): Observable<CompanyEntity> {
+    return this.http.put<CompanyEntity>(`${this.companiesUrl}/${id}/default`, {}).pipe(
+      catchError((error: HttpErrorResponse) => {
+        let errorMessage = 'Failed to set default profile.';
+        if (error.error && typeof error.error === 'object' && error.error.message) {
+          errorMessage = error.error.message;
+        } else if (typeof error.error === 'string') {
+          errorMessage = error.error;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        return throwError(() => new Error(errorMessage));
+      })
+    );
+  }
+
+  /**
    * Sends multipart form data to convert Meesho reports into GSTR-1 JSON
    */
   convertMeesho(formData: FormData): Observable<Gstr1Payload> {

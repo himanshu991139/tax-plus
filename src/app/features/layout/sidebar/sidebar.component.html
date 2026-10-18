@@ -1,0 +1,56 @@
+<aside class="app-sidebar d-none d-lg-flex">
+  <!-- Active workspace notice -->
+  <div class="workspace-card">
+    <div class="d-flex align-items-center gap-2">
+      <div class="workspace-dot"></div>
+      <div class="workspace-text">
+        <span class="workspace-label">Current Client</span>
+        <strong class="workspace-name text-truncate" [title]="state.activeProfile()?.companyName || 'None'">
+          {{ state.activeProfile()?.companyName || 'None' }}
+        </strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation Menu -->
+  <nav class="sidebar-nav">
+    <!-- 1. Manage Profiles -->
+    <a
+      routerLink="/app/profiles"
+      routerLinkActive="active"
+      class="nav-link"
+    >
+      <span class="link-icon"><app-icon name="id-card" [size]="18"></app-icon></span>
+      <span class="link-label">GST Profiles</span>
+      <span class="profile-count-pill">{{ state.profiles().length }}</span>
+    </a>
+
+    <!-- 2. Import Data from Platform -->
+    <a
+      routerLink="/app/dashboard/import"
+      routerLinkActive="active"
+      class="nav-link"
+    >
+      <span class="link-icon"><app-icon name="cloud-upload" [size]="18"></app-icon></span>
+      <span class="link-label">Import Platform Data</span>
+    </a>
+
+    <!-- 3. My Profile & Login Details -->
+    <a
+      routerLink="/app/my-profile"
+      routerLinkActive="active"
+      class="nav-link"
+    >
+      <span class="link-icon"><app-icon name="user" [size]="18"></app-icon></span>
+      <span class="link-label">My Profile &amp; Login</span>
+    </a>
+  </nav>
+
+  <!-- Sidebar Footer -->
+  <div class="sidebar-footer">
+    <a href="#" (click)="$event.preventDefault(); onLogout()" class="logout-link">
+      <app-icon name="logout" [size]="18"></app-icon>
+      <span>Logout</span>
+    </a>
+  </div>
+</aside>

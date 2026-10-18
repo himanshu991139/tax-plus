@@ -1,0 +1,75 @@
+    <div class="logo-box" [attr.data-platform]="platform()">
+      @switch (platform()) {
+        @case ('meesho') {
+          <div class="meesho-logo">
+            <span class="letter">m</span>
+          </div>
+        }
+        @case ('flipkart') {
+          <div class="flipkart-logo">
+            <svg viewBox="0 0 48 48" class="fk-svg">
+              <!-- Yellow bag -->
+              <path d="M12 14h24l-3 26H15L12 14z" fill="#FFE11B" />
+              <!-- Bag handles -->
+              <path d="M18 14V9a6 6 0 0 1 12 0v5" fill="none" stroke="#2874F0" stroke-width="3" stroke-linecap="round" />
+              <!-- F letter -->
+              <path d="M20 20h8v3h-5v4h4v3h-4v7h-3V20z" fill="#2874F0" />
+            </svg>
+          </div>
+        }
+        @case ('amazon') {
+          <div class="amazon-logo">
+            <div class="amazon-box">
+              <span class="amazon-arrow">
+                <svg viewBox="0 0 100 40" class="smile-svg">
+                  <path d="M15 15 Q 50 38 85 15" fill="none" stroke="#111" stroke-width="5" stroke-linecap="round" />
+                  <polygon points="85,15 76,14 83,7" fill="#FF9900" />
+                </svg>
+              </span>
+            </div>
+          </div>
+        }
+        @case ('amazon-b2b') {
+          <div class="amazon-logo b2b">
+            <div class="amazon-box">
+              <span class="amazon-arrow">
+                <svg viewBox="0 0 100 40" class="smile-svg">
+                  <path d="M15 15 Q 50 38 85 15" fill="none" stroke="#111" stroke-width="5" stroke-linecap="round" />
+                  <polygon points="85,15 76,14 83,7" fill="#FF9900" />
+                </svg>
+              </span>
+            </div>
+          </div>
+        }
+        @case ('myntra') {
+          <div class="myntra-logo">
+            <svg viewBox="0 0 50 40" class="myntra-svg">
+              <path d="M5 32 L15 10 L25 24 L18 32 Z" fill="#EE5F73" />
+              <path d="M18 32 L25 24 L32 32 Z" fill="#F26A35" />
+              <path d="M25 24 L35 10 L45 32 L36 32 L30 24 Z" fill="#FF3F6C" />
+            </svg>
+          </div>
+        }
+        @case ('jiomart') {
+          <div class="jiomart-logo">
+            <div class="jio-badge">Jio</div>
+            <div class="mart-badge">Mart</div>
+          </div>
+        }
+        @case ('ajio') {
+          <div class="ajio-logo">
+            <span>AJIO</span>
+          </div>
+        }
+        @case ('nykaa') {
+          <div class="nykaa-logo">
+            <span>NYKAA</span>
+          </div>
+        }
+        @default {
+          <div class="default-logo">
+            <span>{{ platform().slice(0, 2).toUpperCase() }}</span>
+          </div>
+        }
+      }
+    </div>

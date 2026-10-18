@@ -1,0 +1,54 @@
+    <div class="filter-bar">
+      <!-- Search Box -->
+      <div class="search-input-wrapper">
+        <app-icon name="search" [size]="16" customClass="search-icon"></app-icon>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search platforms..."
+          [ngModel]="state.searchQuery()"
+          (ngModelChange)="state.searchQuery.set($event)"
+        />
+      </div>
+
+      <!-- Type Dropdown -->
+      <div class="select-wrapper">
+        <select
+          class="filter-select"
+          [ngModel]="state.selectedType()"
+          (ngModelChange)="state.selectedType.set($event)"
+        >
+          <option value="All">All Types</option>
+          <option value="B2C">B2C</option>
+          <option value="B2B">B2B</option>
+          <option value="B2C/B2B">B2C/B2B</option>
+        </select>
+        <app-icon name="chevron-down" [size]="14" customClass="select-chevron"></app-icon>
+      </div>
+
+      <!-- Status Dropdown -->
+      <div class="select-wrapper">
+        <select
+          class="filter-select"
+          [ngModel]="state.selectedStatus()"
+          (ngModelChange)="state.selectedStatus.set($event)"
+        >
+          <option value="All">All Status</option>
+          <option value="active">Active</option>
+          <option value="ready">Ready</option>
+          <option value="configured">Configured</option>
+        </select>
+        <app-icon name="chevron-down" [size]="14" customClass="select-chevron"></app-icon>
+      </div>
+
+      <!-- Clear Button -->
+      <button
+        type="button"
+        class="btn-clear"
+        (click)="state.clearFilters()"
+        title="Reset filters"
+      >
+        <app-icon name="x" [size]="15"></app-icon>
+        <span>Clear</span>
+      </button>
+    </div>

@@ -1,0 +1,113 @@
+      .modal-dialog-large {
+        background: #ffffff;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 1050px;
+        max-height: 92vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+      }
+
+      .modal-header-custom {
+        padding: 16px 24px;
+        background: linear-gradient(135deg, #1e293b, #0f172a);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .btn-close-custom {
+          background: rgba(255, 255, 255, 0.15);
+          border: none;
+          color: #ffffff;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          &:hover {
+            background: rgba(255, 255, 255, 0.3);
+          }
+        }
+      }
+
+      .modal-body-custom {
+        padding: 24px;
+        overflow-y: auto;
+        flex: 1;
+      }
+
+      .metric-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 10px 14px;
+        display: flex;
+        flex-direction: column;
+
+        .metric-title {
+          font-size: 11px;
+          font-weight: 600;
+          color: #64748b;
+          text-transform: uppercase;
+        }
+
+        .metric-val {
+          font-size: 16px;
+          font-weight: 700;
+          margin-top: 2px;
+        }
+      }
+
+      .tab-table-container {
+        padding: 16px 0;
+      }
+
+      .json-code-box {
+        background: #0f172a;
+        color: #e2e8f0;
+        padding: 16px;
+        border-radius: 8px;
+        max-height: 420px;
+        overflow-y: auto;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 12px;
+      }
+
+      .empty-icon-circle {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .max-w-400 {
+        max-width: 400px;
+      }
+
+@media (max-width: 640px) {
+  .modal-dialog-custom,
+  .modal-dialog-large,
+  .modal-dialog-info {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    margin: 8px auto !important;
+  }
+  .modal-body-custom,
+  .modal-body-info {
+    padding: 14px !important;
+  }
+  .modal-header-custom,
+  .modal-header-info,
+  .modal-header-brand {
+    padding: 12px 14px !important;
+  }
+}

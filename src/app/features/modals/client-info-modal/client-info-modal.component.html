@@ -1,0 +1,98 @@
+    @if (state.isClientInfoModalOpen()) {
+      <div class="modal-overlay" (click)="onBackdropClick($event)">
+        <div class="modal-dialog-info" (click)="$event.stopPropagation()">
+          <!-- Header -->
+          <div class="modal-header-info">
+            <div class="d-flex align-items-center gap-2">
+              <app-icon name="info" [size]="18" class="text-white"></app-icon>
+              <h3 class="m-0 fs-5 fw-bold text-white">Client Information</h3>
+            </div>
+            <button type="button" class="btn-close-white" (click)="state.closeClientInfoModal()" aria-label="Close">
+              <app-icon name="x" [size]="18"></app-icon>
+            </button>
+          </div>
+
+          <!-- Body -->
+          <div class="modal-body-info">
+            @if (profile(); as p) {
+              <!-- Client Details Table -->
+              <div class="client-detail-rows mb-4">
+                <div class="detail-row">
+                  <span class="detail-label d-flex align-items-center gap-2">
+                    <app-icon name="building" [size]="16" class="text-secondary"></app-icon>
+                    <span>Company Name</span>
+                  </span>
+                  <span class="detail-val fw-bold">{{ p.companyName }}</span>
+                </div>
+
+                <div class="detail-row">
+                  <span class="detail-label d-flex align-items-center gap-2">
+                    <app-icon name="user" [size]="16" class="text-secondary"></app-icon>
+                    <span>Owner Name</span>
+                  </span>
+                  <span class="detail-val fw-bold">{{ p.ownerName }}</span>
+                </div>
+
+                <div class="detail-row">
+                  <span class="detail-label d-flex align-items-center gap-2">
+                    <app-icon name="id-card" [size]="16" class="text-secondary"></app-icon>
+                    <span>GSTIN</span>
+                  </span>
+                  <span class="detail-val font-mono fw-bold">{{ p.gstin }}</span>
+                </div>
+              </div>
+
+              <!-- Month and Year Selection -->
+              <div class="filing-period-selection border-top pt-3">
+                <h5 class="fs-6 fw-bold text-dark mb-3">Please provide Month and Year of Filing</h5>
+
+                <div class="mb-3">
+                  <label class="form-label small fw-bold text-dark d-flex align-items-center gap-1">
+                    <app-icon name="calendar" [size]="15" class="text-primary"></app-icon>
+                    <span>Month of Filing :</span>
+                  </label>
+                  <select class="form-select" [(ngModel)]="selectedMonth">
+                    <option value="" disabled>Select month</option>
+                    @for (m of months; track m) {
+                      <option [value]="m">{{ m }}</option>
+                    }
+                  </select>
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label small fw-bold text-dark d-flex align-items-center gap-1">
+                    <app-icon name="calendar" [size]="15" class="text-primary"></app-icon>
+                    <span>Year of Filing :</span>
+                  </label>
+                  <select class="form-select" [(ngModel)]="selectedYear">
+                    <option value="" disabled>Select year</option>
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                  </select>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Footer -->
+          <div class="modal-footer-info">
+            <button
+              type="button"
+              class="btn btn-secondary px-4"
+              (click)="state.closeClientInfoModal()"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="btn btn-brand-amber px-4"
+              (click)="confirmImport()"
+              [disabled]="!selectedMonth || !selectedYear"
+            >
+              Import Data
+            </button>
+          </div>
+        </div>
+      </div>
+    }

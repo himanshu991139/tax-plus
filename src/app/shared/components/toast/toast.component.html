@@ -1,0 +1,26 @@
+    @if (state.toast(); as toast) {
+      <div class="toast-container" [class]="'toast-' + toast.type">
+        <div class="toast-content">
+          <span class="toast-icon">
+            @switch (toast.type) {
+              @case ('success') {
+                <app-icon name="check" [size]="18"></app-icon>
+              }
+              @case ('error') {
+                <app-icon name="alert" [size]="18"></app-icon>
+              }
+              @case ('warning') {
+                <app-icon name="alert" [size]="18"></app-icon>
+              }
+              @default {
+                <app-icon name="info" [size]="18"></app-icon>
+              }
+            }
+          </span>
+          <span class="toast-message">{{ toast.message }}</span>
+          <button type="button" class="toast-close" (click)="state.dismissToast()" aria-label="Close">
+            <app-icon name="x" [size]="14"></app-icon>
+          </button>
+        </div>
+      </div>
+    }

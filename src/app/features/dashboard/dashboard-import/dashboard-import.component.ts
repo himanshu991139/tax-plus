@@ -17,26 +17,8 @@ import { ClientStateService } from '../../../core/services/client-state.service'
     UploadModalComponent,
     StatementModalComponent,
   ],
-  template: `
-    <div class="dashboard-import-page">
-      <!-- Client Header Bar -->
-      <app-client-header></app-client-header>
-
-      <!-- Platform Cards Grid -->
-      <app-platform-grid></app-platform-grid>
-
-      <!-- Modals -->
-      <app-upload-modal></app-upload-modal>
-      <app-statement-modal></app-statement-modal>
-    </div>
-  `,
-  styles: [
-    `
-      .dashboard-import-page {
-        width: 100%;
-      }
-    `,
-  ],
+  templateUrl: './dashboard-import.component.html',
+  styleUrl: './dashboard-import.component.scss',
 })
 export class DashboardImportComponent implements OnInit {
   readonly state = inject(ClientStateService);

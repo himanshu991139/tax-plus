@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { LoginComponent } from './features/auth/login/login.component';
 import { ProfilesComponent } from './features/profiles/profiles.component';
 import { DashboardImportComponent } from './features/dashboard/dashboard-import/dashboard-import.component';
+import { MyProfileComponent } from './features/user-profile/my-profile.component';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
@@ -17,6 +18,11 @@ export const routes: Routes = [
   {
     path: 'app/profiles',
     component: ProfilesComponent,
+    canActivate: [authGuard],
+  },
+  {
+    path: 'app/my-profile',
+    component: MyProfileComponent,
     canActivate: [authGuard],
   },
   {

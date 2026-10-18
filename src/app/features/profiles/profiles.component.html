@@ -1,0 +1,219 @@
+    <div class="profiles-page">
+      <!-- Page Header -->
+      <div class="page-title-row mb-3">
+        <h1 class="page-title d-flex align-items-center gap-2">
+          <span class="title-icon">
+            <app-icon name="id-card" [size]="24"></app-icon>
+          </span>
+          <span>Manage GST Profiles</span>
+        </h1>
+        <p class="page-subtitle text-muted d-flex align-items-center gap-1">
+          <app-icon name="info" [size]="15" class="text-secondary"></app-icon>
+          <span>Click on a profile listed below to proceed or create a new one.</span>
+        </p>
+      </div>
+
+
+      <!-- Active Client Bar (if selected) -->
+      @if (state.activeProfile(); as active) {
+        <div class="active-client-bar mb-4">
+          <div class="client-meta-grid">
+            <div class="meta-item">
+              <div class="meta-icon"><app-icon name="building" [size]="18"></app-icon></div>
+              <div>
+                <div class="meta-lbl">Company</div>
+                <div class="meta-val d-flex align-items-center gap-2">
+                  <span>{{ active.companyName }}</span>
+                  @if (active.isDefault) {
+                    <span class="badge-default-profile" title="Default filing profile">
+                      <app-icon name="star-filled" [size]="12"></app-icon>
+                      <span>Default</span>
+                    </span>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <div class="meta-item">
+              <div class="meta-icon"><app-icon name="user" [size]="18"></app-icon></div>
+              <div>
+                <div class="meta-lbl">Client</div>
+                <div class="meta-val">{{ active.ownerName }}</div>
+              </div>
+            </div>
+
+            <div class="meta-item">
+              <div class="meta-icon"><app-icon name="id-card" [size]="18"></app-icon></div>
+              <div>
+                <div class="meta-lbl">GSTIN</div>
+                <div class="meta-val font-mono">{{ active.gstin }}</div>
+              </div>
+            </div>
+
+            <div class="meta-item">
+              <div class="meta-icon"><app-icon name="clock" [size]="18"></app-icon></div>
+              <div>
+                <div class="meta-lbl">Created On</div>
+                <div class="meta-val">{{ active.createdOn }}</div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Proceed to Import Data Action Button -->
+          <button
+            type="button"
+            class="btn btn-proceed-import"
+            (click)="proceedToImport(active)"
+          >
+            <span>Proceed to Import Data</span>
+            <app-icon name="chevron-down" [size]="14" customClass="rotate-right"></app-icon>
+          </button>
+        </div>
+      }
+
+      <!-- Add GST Profile Button -->
+      <div class="add-profile-row mb-4">
+        <button
+          type="button"
+          class="btn btn-add-profile"
+          (click)="state.openAddProfileModal()"
+        >
+          <app-icon name="building" [size]="14"></app-icon>
+          <span>Add GST Profile</span>
+        </button>
+      </div>
+
+      <!-- Filter and Search Row -->
+      <div class="search-filter-card mb-4">
+        <div class="search-input-wrapper">
+          <app-icon name="search" [size]="16" class="search-icon"></app-icon>
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Search profiles..."
+            [ngModel]="state.profileSearch()"
+            (ngModelChange)="state.profileSearch.set($event)"
+          />
+        </div>
+
+        <!-- Filter Controls - Commented Out
+        <div class="filter-controls-group">
+
+          <div class="select-wrapper">
+            <span class="select-label">GSTR-1:</span>
+            <select
+              class="filter-select"
+              [ngModel]="state.profileGstr1Filter()"
+              (ngModelChange)="state.profileGstr1Filter.set($event)"
+            >
+              <option value="All">All</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+
+          <div class="select-wrapper">
+            <span class="select-label">GSTR-3B:</span>
+            <select
+              class="filter-select"
+              [ngModel]="state.profileGstr3bFilter()"
+              (ngModelChange)="state.profileGstr3bFilter.set($event)"
+            >
+              <option value="All">All</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+            </select>
+          </div>
+
+          @if (hasActiveFilters()) {
+            <button type="button" class="btn btn-sm btn-outline-secondary" (click)="state.clearProfileFilters()">
+              Clear
+            </button>
+          }
+        </div>
+        -->
+      </div>
+
+      <!-- Profiles Table -->
+      <div class="profiles-table-card">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-header-dark">
+              <tr>
+                <th class="text-center" style="width: 50px;">S.NO</th>
+                <th>CREATED ON</th>
+                <th class="text-center" style="width: 100px;">DEFAULT</th>
+                <th>COMPANY NAME</th>
+                <th>OWNER NAME</th>
+                <th>GSTIN</th>
+                <th class="text-end">ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (profile of state.filteredProfiles(); track profile.id) {
+                <tr [class.selected-row]="state.activeProfile()?.id === profile.id">
+                  <td class="text-center font-mono fw-bold">{{ profile.sNo }}</td>
+                  <td class="text-secondary small">{{ profile.createdOn }}</td>
+                  <td class="text-center">
+                    @if (profile.isDefault) {
+                      <button type="button" class="badge-default-pill btn-default-select" (click)="state.setActiveProfile(profile)" title="Default profile (click to select as active)">
+                        <app-icon name="star-filled" [size]="12"></app-icon>
+                        <span>Default</span>
+                      </button>
+                    } @else {
+                      <button
+                        type="button"
+                        class="btn-make-default"
+                        (click)="state.setDefaultProfile(profile)"
+                        title="Make this profile default"
+                      >
+                        <app-icon name="star" [size]="13"></app-icon>
+                        <span>Make Default</span>
+                      </button>
+                    }
+                  </td>
+                  <td class="fw-bold text-dark">{{ profile.companyName }}</td>
+                  <td class="text-dark">{{ profile.ownerName }}</td>
+                  <td class="font-mono text-primary fw-semibold">{{ profile.gstin }}</td>
+                  <td class="text-end">
+                    <div class="d-inline-flex align-items-center gap-2">
+                      <!-- File GST Button -->
+                      <button
+                        type="button"
+                        class="btn-file-gst"
+                        (click)="proceedToImport(profile)"
+                        title="File GST for this client"
+                      >
+                        <app-icon name="cloud-upload" [size]="14"></app-icon>
+                        <span>File GST</span>
+                      </button>
+
+                      <!-- Delete Profile Button -->
+                      <button
+                        type="button"
+                        class="btn-delete-profile"
+                        (click)="deleteProfile(profile)"
+                        title="Delete Profile"
+                      >
+                        <app-icon name="x" [size]="14"></app-icon>
+                        <span>Delete</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="7" class="text-center py-5 text-muted">
+                    No GST profiles found matching your search.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Modals -->
+      <app-add-profile-modal></app-add-profile-modal>
+    </div>

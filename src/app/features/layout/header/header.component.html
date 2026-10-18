@@ -1,0 +1,172 @@
+<header class="app-header">
+  <div class="header-left">
+    <!-- Hamburger button for mobile/tablet screens -->
+    <button
+      type="button"
+      class="mobile-menu-toggle"
+      (click)="toggleMobileMenu()"
+      aria-label="Toggle navigation menu"
+    >
+      <app-icon [name]="isMobileMenuOpen() ? 'x' : 'dashboard'" [size]="20"></app-icon>
+    </button>
+
+    <!-- Modern SaaS Logo -->
+    <a class="brand-logo" routerLink="/app/profiles" (click)="closeMobileMenu()">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" class="logo-svg" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="url(#logoGrad)" />
+          <defs>
+            <linearGradient id="logoGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#38bdf8" />
+              <stop offset="1" stop-color="#818cf8" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="brand-text-col">
+        <span class="brand-name">TaxPulse</span>
+        <span class="brand-tag">GST SUITE</span>
+      </div>
+    </a>
+
+    <!-- Desktop Navigation Links -->
+    <nav class="nav-links">
+      <a
+        routerLink="/app/profiles"
+        routerLinkActive="active"
+        class="nav-link"
+      >
+        <app-icon name="user" [size]="15"></app-icon>
+        <span>GST Profiles</span>
+      </a>
+
+      <a
+        routerLink="/app/dashboard/import"
+        routerLinkActive="active"
+        class="nav-link"
+      >
+        <app-icon name="cloud-upload" [size]="15"></app-icon>
+        <span>Import Data</span>
+      </a>
+
+      <a
+        routerLink="/app/my-profile"
+        routerLinkActive="active"
+        class="nav-link"
+      >
+        <app-icon name="settings" [size]="15"></app-icon>
+        <span>My Profile</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- Right: Active Profile Pill & User Menu -->
+  <div class="header-right">
+    @if (state.activeProfile(); as active) {
+      <a class="active-profile-pill d-none d-sm-flex" routerLink="/app/dashboard/import" title="Go to Import page">
+        <span class="pill-dot"></span>
+        <span class="pill-client text-truncate">{{ active.companyName }}</span>
+        @if (active.isDefault) {
+          <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-1 py-0 ms-1 rounded-pill" style="font-size: 10px; font-weight: 700;">Default</span>
+        }
+        <span class="pill-period">({{ active.period }})</span>
+      </a>
+    }
+
+    <div class="user-profile" (click)="toggleUserMenu()">
+      @if (auth.currentUser()?.picture) {
+        <img [src]="auth.currentUser()?.picture" class="avatar-img" alt="avatar" />
+      } @else {
+        <div class="avatar-circle">
+          <span>{{ (auth.currentUser()?.name || 'User').charAt(0).toUpperCase() }}</span>
+        </div>
+      }
+      <span class="user-greeting d-none d-md-inline">{{ auth.currentUser()?.name || 'Account' }}</span>
+      <app-icon name="chevron-down" [size]="13" customClass="user-chevron"></app-icon>
+    </div>
+
+    @if (isUserMenuOpen()) {
+      <div class="user-dropdown-menu">
+        <div class="user-info-banner">
+          <div class="user-name text-truncate">{{ auth.currentUser()?.name || 'User' }}</div>
+          <div class="user-role text-truncate">{{ auth.currentUser()?.email || 'Logged In User' }}</div>
+        </div>
+        <a routerLink="/app/my-profile" (click)="isUserMenuOpen.set(false)" class="dropdown-item">
+          <app-icon name="user" [size]="14"></app-icon>
+          <span>My Profile &amp; Login Details</span>
+        </a>
+        <a routerLink="/app/profiles" (click)="isUserMenuOpen.set(false)" class="dropdown-item">
+          <app-icon name="id-card" [size]="14"></app-icon>
+          <span>Manage GST Profiles</span>
+        </a>
+        <div class="dropdown-divider"></div>
+        <a href="#" (click)="$event.preventDefault(); onLogout(); isUserMenuOpen.set(false)" class="dropdown-item logout">
+          <app-icon name="logout" [size]="14"></app-icon>
+          <span>Logout</span>
+        </a>
+      </div>
+    }
+  </div>
+</header>
+
+<!-- Mobile Navigation Drawer -->
+@if (isMobileMenuOpen()) {
+  <div class="mobile-nav-backdrop" (click)="closeMobileMenu()"></div>
+  <div class="mobile-nav-drawer">
+    <div class="mobile-drawer-header">
+      <div class="d-flex align-items-center gap-2">
+        <div class="logo-mark-sm">
+          <app-icon name="dashboard" [size]="18" class="text-info"></app-icon>
+        </div>
+        <span class="drawer-title">TaxPulse GST</span>
+      </div>
+      <button type="button" class="btn-close-drawer" (click)="closeMobileMenu()">
+        <app-icon name="x" [size]="18"></app-icon>
+      </button>
+    </div>
+
+    <div class="mobile-drawer-body">
+      @if (state.activeProfile(); as active) {
+        <div class="mobile-active-client-box">
+          <small class="text-muted text-uppercase fw-bold">Active Client</small>
+          <div class="fw-bold text-dark text-truncate">{{ active.companyName }}</div>
+          <small class="text-secondary font-mono">{{ active.gstin }} ({{ active.period }})</small>
+        </div>
+      }
+
+      <div class="mobile-nav-links">
+        <a routerLink="/app/profiles" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-link">
+          <app-icon name="id-card" [size]="18"></app-icon>
+          <span>GST Profiles</span>
+          <span class="badge bg-secondary-subtle text-dark ms-auto">{{ state.profiles().length }}</span>
+        </a>
+
+        <a routerLink="/app/dashboard/import" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-link">
+          <app-icon name="cloud-upload" [size]="18"></app-icon>
+          <span>Import Platform Data</span>
+        </a>
+
+        <a routerLink="/app/my-profile" routerLinkActive="active" (click)="closeMobileMenu()" class="mobile-link">
+          <app-icon name="user" [size]="18"></app-icon>
+          <span>My Profile &amp; Login Details</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="mobile-drawer-footer">
+      <div class="user-row mb-3">
+        <div class="avatar-circle-sm">
+          {{ (auth.currentUser()?.name || 'U').charAt(0).toUpperCase() }}
+        </div>
+        <div class="user-text-col text-truncate">
+          <div class="fw-bold text-truncate text-dark small">{{ auth.currentUser()?.name || 'User' }}</div>
+          <div class="text-muted text-truncate" style="font-size: 11px;">{{ auth.currentUser()?.email || '' }}</div>
+        </div>
+      </div>
+      <button type="button" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2 btn-sm" (click)="onLogout(); closeMobileMenu()">
+        <app-icon name="logout" [size]="15"></app-icon>
+        <span>Logout</span>
+      </button>
+    </div>
+  </div>
+}

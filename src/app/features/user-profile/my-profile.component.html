@@ -1,0 +1,111 @@
+<div class="user-profile-page">
+  <!-- Page Header -->
+  <div class="page-header mb-4">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+      <div>
+        <h1 class="page-title d-flex align-items-center gap-2">
+          <span class="title-icon">
+            <app-icon name="user" [size]="24"></app-icon>
+          </span>
+          <span>My Profile</span>
+        </h1>
+        <p class="page-subtitle text-muted mb-0">
+          Manage your account profile and view your login status.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="profile-layout-grid">
+    <!-- User Overview Card -->
+    <div class="profile-card hero-card">
+      <div class="hero-top-banner"></div>
+      <div class="hero-body">
+        <div class="avatar-wrapper">
+          @if (user?.picture) {
+            <img [src]="user?.picture" class="user-large-avatar" alt="Profile picture" />
+          } @else {
+            <div class="avatar-large-fallback">
+              {{ (user?.name || 'User').charAt(0).toUpperCase() }}
+            </div>
+          }
+          <span class="status-indicator-badge online" title="Logged in"></span>
+        </div>
+
+        <div class="hero-text">
+          <h2 class="user-full-name">{{ user?.name || 'TaxPulse User' }}</h2>
+          <p class="user-email-text">{{ user?.email || 'Logged in via Google' }}</p>
+          <span class="badge-role mt-2">Verified Account</span>
+        </div>
+      </div>
+
+      <div class="hero-quick-stats">
+        <div class="quick-stat-box">
+          <span class="stat-label">GST Profiles</span>
+          <strong class="stat-val text-primary">{{ state.profiles().length }}</strong>
+        </div>
+        <div class="quick-stat-box">
+          <span class="stat-label">Active Client</span>
+          <strong class="stat-val text-truncate" [title]="state.activeProfile()?.companyName || 'None'">
+            {{ state.activeProfile()?.companyName || 'None' }}
+          </strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Account & Login Information -->
+    <div class="profile-card details-card">
+      <div class="card-section-header">
+        <h3 class="section-title">
+          <app-icon name="user" [size]="18" class="text-primary"></app-icon>
+          <span>Account &amp; Login Details</span>
+        </h3>
+        <span class="badge bg-success-subtle text-success border border-success-subtle">
+          Logged In
+        </span>
+      </div>
+
+      <div class="credentials-table">
+        <div class="cred-row">
+          <div class="cred-label">
+            <span class="cred-name">Full Name</span>
+            <small class="cred-desc">Your display name</small>
+          </div>
+          <div class="cred-value fw-semibold">{{ user?.name || 'TaxPulse User' }}</div>
+        </div>
+
+        <div class="cred-row">
+          <div class="cred-label">
+            <span class="cred-name">Email Address</span>
+            <small class="cred-desc">Associated with your login</small>
+          </div>
+          <div class="cred-value">{{ user?.email || 'N/A' }}</div>
+        </div>
+
+        <div class="cred-row">
+          <div class="cred-label">
+            <span class="cred-name">Sign-in Method</span>
+            <small class="cred-desc">How you sign in</small>
+          </div>
+          <div class="cred-value d-flex align-items-center gap-2">
+            <span class="badge bg-light text-dark border">
+              Google Account
+            </span>
+          </div>
+        </div>
+
+        <div class="cred-row">
+          <div class="cred-label">
+            <span class="cred-name">Account Status</span>
+            <small class="cred-desc">Current session health</small>
+          </div>
+          <div class="cred-value">
+            <span class="badge bg-success-subtle text-success border border-success-subtle">
+              Active &amp; Secure
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
