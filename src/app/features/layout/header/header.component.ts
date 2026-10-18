@@ -2,7 +2,9 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ClientStateService } from '../../../core/services/client-state.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
+
 
 @Component({
   selector: 'app-header',
@@ -67,18 +69,22 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
         }
 
         <div class="user-profile" (click)="toggleUserMenu()">
-          <div class="avatar-circle">
-            <span>H</span>
-          </div>
-          <span class="user-greeting">himanshu</span>
+          @if (auth.currentUser()?.picture) {
+            <img [src]="auth.currentUser()?.picture" class="avatar-img" alt="avatar" />
+          } @else {
+            <div class="avatar-circle">
+              <span>{{ (auth.currentUser()?.name || 'User').charAt(0).toUpperCase() }}</span>
+            </div>
+          }
+          <span class="user-greeting">{{ auth.currentUser()?.name || 'Account' }}</span>
           <app-icon name="chevron-down" [size]="13" customClass="user-chevron"></app-icon>
         </div>
 
         @if (isUserMenuOpen()) {
           <div class="user-dropdown-menu">
             <div class="user-info-banner">
-              <div class="user-name">Himanshu</div>
-              <div class="user-role">GST Compliance Manager</div>
+              <div class="user-name">{{ auth.currentUser()?.name || 'User' }}</div>
+              <div class="user-role">{{ auth.currentUser()?.email || 'Logged In User' }}</div>
             </div>
             <a routerLink="/app/profiles" (click)="isUserMenuOpen.set(false)" class="dropdown-item">
               <app-icon name="id-card" [size]="14"></app-icon>
@@ -288,6 +294,14 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
           background: rgba(255, 255, 255, 0.08);
         }
 
+        .avatar-img {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          object-fit: cover;
+          border: 1.5px solid #38bdf8;
+        }
+
         .avatar-circle {
           width: 32px;
           height: 32px;
@@ -362,6 +376,7 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
 })
 export class HeaderComponent {
   readonly state = inject(ClientStateService);
+  readonly auth = inject(AuthService);
   readonly activeDropdown = signal<string | null>(null);
   readonly isUserMenuOpen = signal<boolean>(false);
 
@@ -378,6 +393,7 @@ export class HeaderComponent {
   }
 
   onLogout(): void {
+    this.auth.logout();
     this.state.showToast('You have been logged out safely.', 'info');
   }
 }

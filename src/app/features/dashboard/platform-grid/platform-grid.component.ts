@@ -12,7 +12,9 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
     @if (state.filteredPlatforms().length > 0) {
       <div class="platforms-grid">
         @for (platform of state.filteredPlatforms(); track platform.id) {
-          <app-platform-card [platform]="platform"></app-platform-card>
+          @if (platform.id === 'meesho-b2c') {
+            <app-platform-card [platform]="platform"></app-platform-card>
+          }
         }
       </div>
     } @else {
