@@ -11,7 +11,7 @@ import { apiUrl } from '../config/app-config';
 export class GstApiService {
   private readonly http = inject(HttpClient);
   // Resolved from runtime config (public/api-config.json): dev routes through
-  // the proxy to localhost:8080, prod through the configured backend origin.
+  // the proxy to localhost:8081, prod through the configured backend origin.
   private readonly convertUrl = apiUrl('/api/v1/gst/convert-meesho');
   private readonly companiesUrl = apiUrl('/api/companies');
 

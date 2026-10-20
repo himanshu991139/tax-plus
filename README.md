@@ -36,7 +36,7 @@ A modern, high-performance Angular 22 application for importing e-commerce platf
 
 - **Angular**: 22.2.0 (Standalone Components, Signals, Router, Modern Fetch HttpClient)
 - **CSS / UI**: Bootstrap 5.3.8, Angular Material 22.2.3, SCSS
-- **Backend**: Spring Boot 3.3.4 (running on `http://localhost:8080`)
+- **Backend**: Spring Boot 3.3.4 (running on `http://localhost:8081`)
 - **Dev Server Proxy**: Configured via `proxy.conf.json`
 
 ---
@@ -49,7 +49,7 @@ Make sure the Spring Boot service in `D:\projects` is running:
 cd D:\projects
 .\mvnw.cmd spring-boot:run
 ```
-(Swagger UI: `http://localhost:8080/swagger-ui/index.html`)
+(Swagger UI: `http://localhost:8081/swagger-ui/index.html`)
 
 ### 2. Frontend Development Server
 Start the Angular dev server in `D:\ui`:

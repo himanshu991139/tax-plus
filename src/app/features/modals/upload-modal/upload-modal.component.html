@@ -41,9 +41,11 @@
                 <div class="dropzone-header">
                   <div class="dropzone-title">
                     <span class="badge bg-danger-subtle text-danger border border-danger-subtle me-1">Required</span>
-                    <strong>TCS Sales Report</strong> (.xlsx or .csv)
+                    <span class="meesho-file-icon">📊</span>
+                    <strong>tcs_sales</strong>
+                    <span class="file-ext-hint">.xlsx or .csv</span>
                   </div>
-                  <small class="text-muted">Meesho forward orders report (tcs_sales.csv/xlsx)</small>
+                  <small class="text-muted">Meesho forward orders &amp; TCS report — file must be named exactly <strong>tcs_sales</strong></small>
                 </div>
 
                 @if (salesFile(); as file) {
@@ -52,6 +54,9 @@
                       <app-icon name="excel" [size]="20" class="text-success"></app-icon>
                       <span class="file-name">{{ file.name }}</span>
                       <span class="file-size text-muted">({{ formatBytes(file.size) }})</span>
+                      @if (isMeeshoFileName(file.name, 'sales')) {
+                        <app-icon name="check-circle" [size]="16" class="text-success" title="Correct Meesho file name"></app-icon>
+                      }
                     </div>
                     <button type="button" class="btn-remove-file" (click)="salesFile.set(null)">
                       <app-icon name="x" [size]="14"></app-icon>
@@ -61,7 +66,7 @@
                   <label class="file-picker-label">
                     <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event, 'sales')" />
                     <app-icon name="cloud-upload" [size]="22" class="text-primary"></app-icon>
-                    <span>Click or drag to choose <strong>tcs_sales</strong> file</span>
+                    <span>Choose file named <strong>tcs_sales</strong> (.xlsx or .csv)</span>
                   </label>
                 }
               </div>
@@ -71,9 +76,11 @@
                 <div class="dropzone-header">
                   <div class="dropzone-title">
                     <span class="badge bg-danger-subtle text-danger border border-danger-subtle me-1">Required</span>
-                    <strong>TCS Sales Return Report</strong> (.xlsx or .csv)
+                    <span class="meesho-file-icon">↩️</span>
+                    <strong>tcs_sales_return</strong>
+                    <span class="file-ext-hint">.xlsx or .csv</span>
                   </div>
-                  <small class="text-muted">Customer returns & RTOs report (tcs_sales_return.csv/xlsx)</small>
+                  <small class="text-muted">Customer returns &amp; RTOs report — file must be named exactly <strong>tcs_sales_return</strong></small>
                 </div>
 
                 @if (returnFile(); as file) {
@@ -82,6 +89,9 @@
                       <app-icon name="excel" [size]="20" class="text-warning"></app-icon>
                       <span class="file-name">{{ file.name }}</span>
                       <span class="file-size text-muted">({{ formatBytes(file.size) }})</span>
+                      @if (isMeeshoFileName(file.name, 'return')) {
+                        <app-icon name="check-circle" [size]="16" class="text-success" title="Correct Meesho file name"></app-icon>
+                      }
                     </div>
                     <button type="button" class="btn-remove-file" (click)="returnFile.set(null)">
                       <app-icon name="x" [size]="14"></app-icon>
@@ -91,7 +101,7 @@
                   <label class="file-picker-label">
                     <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event, 'return')" />
                     <app-icon name="cloud-upload" [size]="22" class="text-secondary"></app-icon>
-                    <span>Click or drag to choose <strong>tcs_sales_return</strong> file</span>
+                    <span>Choose file named <strong>tcs_sales_return</strong> (.xlsx or .csv)</span>
                   </label>
                 }
               </div>
@@ -101,9 +111,11 @@
                 <div class="dropzone-header">
                   <div class="dropzone-title">
                     <span class="badge bg-danger-subtle text-danger border border-danger-subtle me-1">Required</span>
-                    <strong>Tax Invoice Details Report</strong> (.xlsx or .csv)
+                    <span class="meesho-file-icon">📄</span>
+                    <strong>tax_invoice_details</strong>
+                    <span class="file-ext-hint">.xlsx or .csv</span>
                   </div>
-                  <small class="text-muted">Tax invoice document series report (tax_invoice_details.csv/xlsx)</small>
+                  <small class="text-muted">Tax invoice document series report — file must be named exactly <strong>tax_invoice_details</strong></small>
                 </div>
 
                 @if (invoiceFile(); as file) {
@@ -112,6 +124,9 @@
                       <app-icon name="csv" [size]="20" class="text-info"></app-icon>
                       <span class="file-name">{{ file.name }}</span>
                       <span class="file-size text-muted">({{ formatBytes(file.size) }})</span>
+                      @if (isMeeshoFileName(file.name, 'invoice')) {
+                        <app-icon name="check-circle" [size]="16" class="text-success" title="Correct Meesho file name"></app-icon>
+                      }
                     </div>
                     <button type="button" class="btn-remove-file" (click)="invoiceFile.set(null)">
                       <app-icon name="x" [size]="14"></app-icon>
@@ -121,7 +136,7 @@
                   <label class="file-picker-label">
                     <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event, 'invoice')" />
                     <app-icon name="cloud-upload" [size]="22" class="text-secondary"></app-icon>
-                    <span>Click or drag to choose <strong>tax_invoice_details</strong> file</span>
+                    <span>Choose file named <strong>tax_invoice_details</strong> (.xlsx or .csv)</span>
                   </label>
                 }
               </div>

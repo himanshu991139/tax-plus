@@ -43,8 +43,29 @@ export class UploadModalComponent {
     }
   }
 
+  /**
+   * Expected base file names for Meesho reports (without extension).
+   * The dialog only accepts files whose name matches one of these exactly.
+   */
+  private static readonly MEESHO_FILE_MAP: Record<'sales' | 'return' | 'invoice', string> = {
+    sales: 'tcs_sales',
+    return: 'tcs_sales_return',
+    invoice: 'tax_invoice_details',
+  };
+
   private static readonly ALLOWED_EXTENSIONS = ['.csv', '.xlsx', '.xls'];
   private static readonly MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
+
+  /**
+   * Checks whether the given file name matches the expected Meesho base name
+   * (e.g. "tcs_sales.xlsx" or "tcs_sales.csv" matches "tcs_sales").
+   */
+  isMeeshoFileName(fileName: string, type: 'sales' | 'return' | 'invoice'): boolean {
+    const expectedBase = UploadModalComponent.MEESHO_FILE_MAP[type];
+    const dotIndex = fileName.lastIndexOf('.');
+    const baseName = dotIndex > 0 ? fileName.substring(0, dotIndex) : fileName;
+    return baseName === expectedBase;
+  }
 
   onFileSelected(event: Event, type: 'sales' | 'return' | 'invoice'): void {
     const input = event.target as HTMLInputElement;
@@ -66,6 +87,17 @@ export class UploadModalComponent {
 
       if (file.size > UploadModalComponent.MAX_FILE_SIZE_BYTES) {
         this.errorMessage.set(`"${file.name}" is ${this.formatBytes(file.size)}. Maximum allowed size is 10 MB.`);
+        input.value = '';
+        return;
+      }
+
+      // Validate that the file is named exactly as expected for Meesho
+      if (!this.isMeeshoFileName(file.name, type)) {
+        const expected = UploadModalComponent.MEESHO_FILE_MAP[type];
+        this.errorMessage.set(
+          `This is a Meesho upload. The file must be named exactly "${expected}", but got "${file.name}".
+           Please rename the file or choose the correct Meesho report.`
+        );
         input.value = '';
         return;
       }
