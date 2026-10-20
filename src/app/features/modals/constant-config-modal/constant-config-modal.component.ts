@@ -28,9 +28,31 @@ export class ConstantConfigModalComponent {
     return !/^https?:\/\/\S+$/i.test(url);
   });
 
+  readonly deadlineDaysInvalid = computed(() => {
+    const val = Number(this.formConfig.filingDeadlineDaysLeft);
+    return isNaN(val) || val < 0 || val > 365 || !Number.isInteger(val);
+  });
+
+  readonly maxProfilesInvalid = computed(() => {
+    const val = Number(this.formConfig.maxProfilesAllowed);
+    return isNaN(val) || val < 1 || val > 1000 || !Number.isInteger(val);
+  });
+
+  readonly isFormInvalid = computed(() => {
+    return this.apiUrlInvalid() || this.deadlineDaysInvalid() || this.maxProfilesInvalid();
+  });
+
   saveConfig(): void {
     if (this.apiUrlInvalid()) {
       this.state.showToast('Backend API Endpoint URL must be a valid http(s) URL.', 'error');
+      return;
+    }
+    if (this.deadlineDaysInvalid()) {
+      this.state.showToast('Deadline Days Left must be an integer between 0 and 365.', 'error');
+      return;
+    }
+    if (this.maxProfilesInvalid()) {
+      this.state.showToast('Max Profiles Allowed must be an integer between 1 and 1000.', 'error');
       return;
     }
 

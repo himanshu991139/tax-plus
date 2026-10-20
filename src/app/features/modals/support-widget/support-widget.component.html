@@ -39,28 +39,44 @@
               </div>
 
               <div class="mb-3">
-                <label class="form-label small fw-semibold text-muted">Subject</label>
+                <label class="form-label small fw-semibold text-muted">
+                  Subject <span class="text-danger">*</span>
+                </label>
                 <input
                   type="text"
                   class="form-control"
+                  [class.is-invalid]="subjectInvalid()"
                   maxlength="150"
                   required
                   [(ngModel)]="subject"
                   placeholder="e.g. Issue converting September 2026 reports"
                 />
+                @if (subjectInvalid()) {
+                  <div class="invalid-feedback d-block small">
+                    Subject must be between 5 and 150 characters.
+                  </div>
+                }
                 <small class="text-muted">{{ subject.length }}/150</small>
               </div>
 
               <div class="mb-3">
-                <label class="form-label small fw-semibold text-muted">Description / Details</label>
+                <label class="form-label small fw-semibold text-muted">
+                  Description / Details <span class="text-danger">*</span>
+                </label>
                 <textarea
                   class="form-control"
+                  [class.is-invalid]="descriptionInvalid()"
                   rows="4"
                   maxlength="2000"
                   required
                   [(ngModel)]="description"
                   placeholder="Describe what occurred, any specific error message, or invoice series details..."
                 ></textarea>
+                @if (descriptionInvalid()) {
+                  <div class="invalid-feedback d-block small">
+                    Description must be at least 10 characters (up to 2000 characters).
+                  </div>
+                }
                 <small class="text-muted">{{ description.length }}/2000</small>
               </div>
             }
@@ -71,7 +87,12 @@
               <button type="button" class="btn btn-outline-secondary" (click)="state.closeSupportModal()">
                 Cancel
               </button>
-              <button type="button" class="btn btn-primary-navy" (click)="submitTicket()" [disabled]="!subject.trim() || subject.trim().length < 5">
+              <button
+                type="button"
+                class="btn btn-primary-navy"
+                (click)="submitTicket()"
+                [disabled]="!subject.trim() || subject.trim().length < 5 || !description.trim() || description.trim().length < 10"
+              >
                 Submit Ticket
               </button>
             </div>

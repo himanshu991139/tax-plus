@@ -58,12 +58,13 @@ export class UploadModalComponent {
 
   /**
    * Checks whether the given file name matches the expected Meesho base name
-   * (e.g. "tcs_sales.xlsx" or "tcs_sales.csv" matches "tcs_sales").
+   * (e.g. "Tax_invoice_details.xlsx" or "tax_invoice_details.csv" matches "tax_invoice_details").
+   * Matching is case-insensitive and trims whitespace.
    */
   isMeeshoFileName(fileName: string, type: 'sales' | 'return' | 'invoice'): boolean {
-    const expectedBase = UploadModalComponent.MEESHO_FILE_MAP[type];
+    const expectedBase = UploadModalComponent.MEESHO_FILE_MAP[type].toLowerCase();
     const dotIndex = fileName.lastIndexOf('.');
-    const baseName = dotIndex > 0 ? fileName.substring(0, dotIndex) : fileName;
+    const baseName = (dotIndex > 0 ? fileName.substring(0, dotIndex) : fileName).trim().toLowerCase();
     return baseName === expectedBase;
   }
 

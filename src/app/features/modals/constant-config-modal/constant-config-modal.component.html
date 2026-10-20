@@ -32,16 +32,42 @@
 
               <div class="col-md-6">
                 <label class="form-label small fw-bold text-dark">Deadline Days Left</label>
-                <input type="number" class="form-control" min="0" max="365" step="1" [(ngModel)]="formConfig.filingDeadlineDaysLeft" />
-                <small class="text-muted">e.g. 6</small>
+                <input
+                  type="number"
+                  class="form-control"
+                  [class.is-invalid]="deadlineDaysInvalid()"
+                  min="0"
+                  max="365"
+                  step="1"
+                  [(ngModel)]="formConfig.filingDeadlineDaysLeft"
+                />
+                <small class="text-muted">e.g. 6 (0 - 365 days)</small>
+                @if (deadlineDaysInvalid()) {
+                  <div class="invalid-feedback d-block small">
+                    Must be an integer between 0 and 365.
+                  </div>
+                }
               </div>
             </div>
 
             <div class="row g-3 mb-3">
               <div class="col-md-6">
                 <label class="form-label small fw-bold text-dark">Max Profiles Allowed</label>
-                <input type="number" class="form-control" min="1" max="1000" step="1" [(ngModel)]="formConfig.maxProfilesAllowed" />
-                <small class="text-muted">Default limit: 10</small>
+                <input
+                  type="number"
+                  class="form-control"
+                  [class.is-invalid]="maxProfilesInvalid()"
+                  min="1"
+                  max="1000"
+                  step="1"
+                  [(ngModel)]="formConfig.maxProfilesAllowed"
+                />
+                <small class="text-muted">Default limit: 10 (1 - 1000)</small>
+                @if (maxProfilesInvalid()) {
+                  <div class="invalid-feedback d-block small">
+                    Must be an integer between 1 and 1000.
+                  </div>
+                }
               </div>
 
               <div class="col-md-6">
@@ -68,7 +94,7 @@
             <button type="button" class="btn btn-outline-secondary" (click)="state.closeConstantConfigModal()">
               Cancel
             </button>
-            <button type="button" class="btn btn-brand-indigo" (click)="saveConfig()" [disabled]="apiUrlInvalid()">
+            <button type="button" class="btn btn-brand-indigo" (click)="saveConfig()" [disabled]="isFormInvalid()">
               Save Configuration
             </button>
           </div>

@@ -30,38 +30,26 @@
           <!-- Body -->
           <div class="modal-body-custom">
             @if (state.gstr1Payload(); as gstr1) {
-              <!-- Metrics Cards Row -->
-              <div class="row g-2 mb-4">
-                <div class="col-6 col-md-3">
-                  <div class="metric-card">
-                    <span class="metric-title">Taxable Value</span>
-                    <span class="metric-val text-primary">{{ summary()?.totalTaxableValue | inrCurrency }}</span>
-                  </div>
-                </div>
-                <div class="col-6 col-md-3">
-                  <div class="metric-card">
-                    <span class="metric-title">Total Tax (IGST+CGST+SGST)</span>
-                    <span class="metric-val text-success">{{ summary()?.totalTax | inrCurrency }}</span>
-                  </div>
-                </div>
-                <div class="col-6 col-md-2">
-                  <div class="metric-card">
-                    <span class="metric-title">IGST</span>
-                    <span class="metric-val">{{ summary()?.totalIgst | inrCurrency }}</span>
-                  </div>
-                </div>
-                <div class="col-6 col-md-2">
-                  <div class="metric-card">
-                    <span class="metric-title">CGST / SGST</span>
-                    <span class="metric-val">{{ summary()?.totalCgst | inrCurrency }}</span>
-                  </div>
-                </div>
-                <div class="col-6 col-md-2">
-                  <div class="metric-card">
-                    <span class="metric-title">Net Invoices</span>
-                    <span class="metric-val text-dark">{{ summary()?.netInvoices || 0 }}</span>
-                  </div>
-                </div>
+              <!-- Top Tax Summary Table -->
+              <div class="summary-table-container mb-4">
+                <table class="summary-strip-table">
+                  <thead>
+                    <tr>
+                      <th>Taxable Value</th>
+                      <th>Integrated tax</th>
+                      <th>Central tax</th>
+                      <th>State/UT tax</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>{{ summary()?.totalTaxableValue | inrCurrency }}</td>
+                      <td>{{ summary()?.totalIgst | inrCurrency }}</td>
+                      <td>{{ summary()?.totalCgst | inrCurrency }}</td>
+                      <td>{{ summary()?.totalSgst | inrCurrency }}</td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
 
               <!-- Mat Tabs for Tables -->

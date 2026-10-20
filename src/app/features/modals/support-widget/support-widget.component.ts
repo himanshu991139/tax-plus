@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClientStateService } from '../../../core/services/client-state.service';
@@ -19,8 +19,22 @@ export class SupportWidgetComponent {
   description = '';
   readonly ticketSubmitted = signal<boolean>(false);
   readonly ticketId = signal<number>(Math.floor(10000 + Math.random() * 90000));
+  readonly hasAttemptedSubmit = signal<boolean>(false);
+
+  readonly subjectInvalid = computed(() => {
+    if (!this.hasAttemptedSubmit()) return false;
+    const len = this.subject.trim().length;
+    return len < 5 || len > 150;
+  });
+
+  readonly descriptionInvalid = computed(() => {
+    if (!this.hasAttemptedSubmit()) return false;
+    const len = this.description.trim().length;
+    return len < 10 || len > 2000;
+  });
 
   submitTicket(): void {
+    this.hasAttemptedSubmit.set(true);
     const trimmedSubject = this.subject.trim();
     const trimmedDescription = this.description.trim();
 
@@ -32,6 +46,10 @@ export class SupportWidgetComponent {
       this.state.showToast('Subject must be at most 150 characters.', 'warning');
       return;
     }
+    if (trimmedDescription.length < 10) {
+      this.state.showToast('Please provide a brief description (at least 10 characters).', 'warning');
+      return;
+    }
     if (trimmedDescription.length > 2000) {
       this.state.showToast('Description must be at most 2000 characters.', 'warning');
       return;
@@ -39,6 +57,7 @@ export class SupportWidgetComponent {
 
     this.ticketId.set(Math.floor(10000 + Math.random() * 90000));
     this.ticketSubmitted.set(true);
+    this.hasAttemptedSubmit.set(false);
     this.state.showToast('Support ticket created successfully!', 'success');
   }
 

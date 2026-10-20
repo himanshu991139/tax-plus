@@ -27,9 +27,10 @@ export class AddProfileModalComponent {
   readonly showPassword = signal<boolean>(false);
   readonly detectedState = signal<string | null>(null);
   readonly stateCode = signal<string>('09');
+  readonly hasAttemptedSubmit = signal<boolean>(false);
 
-  /** GSTIN format: 2-digit state code + 10-char PAN + entity number + 'Z' + check char. */
-  private static readonly GSTIN_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z][0-9A-Z]$/;
+  /** GSTIN format: 2-digit state code + 10-char PAN + entity number + 'Z' + check char (15 chars total). */
+  private static readonly GSTIN_REGEX = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
 
   /** True when something is typed but it does not yet match the GSTIN format. */
   readonly gstinInvalid = computed(() => {
@@ -37,14 +38,21 @@ export class AddProfileModalComponent {
     return v.length > 0 && !AddProfileModalComponent.GSTIN_REGEX.test(v);
   });
 
+  readonly companyNameInvalid = computed(() => {
+    return this.hasAttemptedSubmit() && !this.companyName.trim();
+  });
+
+  readonly gstinRequiredInvalid = computed(() => {
+    return this.hasAttemptedSubmit() && (!this.gstin.trim() || this.gstinInvalid());
+  });
+
   onGstinChange(val: string): void {
-    // Force uppercase so the model matches the displayed value.
-    const upper = (val || '').toUpperCase();
-    if (upper !== val) {
-      this.gstin = upper;
-    }
-    if (upper.length >= 2) {
-      const code = upper.substring(0, 2);
+    // Sanitize to only alphanumeric characters and force uppercase
+    const cleaned = (val || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    this.gstin = cleaned;
+
+    if (cleaned.length >= 2) {
+      const code = cleaned.substring(0, 2);
       this.stateCode.set(code);
       const stateName = GST_STATE_MAP[code];
       if (stateName) {
@@ -58,6 +66,7 @@ export class AddProfileModalComponent {
   }
 
   saveProfile(): void {
+    this.hasAttemptedSubmit.set(true);
     const cleanGstin = this.gstin.trim().toUpperCase();
     const cleanCompanyName = this.companyName.trim();
     const cleanOwnerName = this.ownerName.trim() || cleanCompanyName;
@@ -104,6 +113,7 @@ export class AddProfileModalComponent {
     this.ownerName = '';
     this.gstUsername = '';
     this.gstPassword = '';
+    this.hasAttemptedSubmit.set(false);
     this.detectedState.set(null);
   }
 
