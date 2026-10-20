@@ -4,8 +4,18 @@
           <!-- Modal Header -->
           <div class="modal-header-custom">
             <div class="header-left-col">
-              <div class="modal-platform-badge">
-                <app-platform-logo [platform]="currentPlatformLogo()" class="header-mini-logo"></app-platform-logo>
+              <div class="modal-brand-badge">
+                <div class="modal-logo-mark">
+                  <svg viewBox="0 0 24 24" class="logo-svg" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="url(#modalLogoGrad)" />
+                    <defs>
+                      <linearGradient id="modalLogoGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#38bdf8" />
+                        <stop offset="1" stop-color="#818cf8" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                </div>
                 <div>
                   <h2 class="modal-title">
                     Import {{ state.selectedPlatform()?.name || 'Platform' }} Data

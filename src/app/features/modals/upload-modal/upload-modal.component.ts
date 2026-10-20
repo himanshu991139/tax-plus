@@ -6,7 +6,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ClientStateService } from '../../../core/services/client-state.service';
 import { GstApiService } from '../../../core/services/gst-api.service';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
-import { PlatformLogoComponent } from '../../../shared/components/platform-logo/platform-logo.component';
 
 @Component({
   selector: 'app-upload-modal',
@@ -17,7 +16,6 @@ import { PlatformLogoComponent } from '../../../shared/components/platform-logo/
     MatProgressBarModule,
     MatTooltipModule,
     IconComponent,
-    PlatformLogoComponent,
   ],
   templateUrl: './upload-modal.component.html',
   styleUrl: './upload-modal.component.scss',
@@ -35,10 +33,6 @@ export class UploadModalComponent {
 
   readonly isSubmitting = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
-
-  currentPlatformLogo(): string {
-    return this.state.selectedPlatform()?.logoType || 'meesho';
-  }
 
   /**
    * Whether the currently selected platform is Amazon.
