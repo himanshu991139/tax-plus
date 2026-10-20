@@ -8,6 +8,7 @@ import { ConstantConfigModalComponent } from './features/modals/constant-config-
 import { SupportWidgetComponent } from './features/modals/support-widget/support-widget.component';
 import { ClientInfoModalComponent } from './features/modals/client-info-modal/client-info-modal.component';
 import { AuthService } from './core/services/auth.service';
+import { NgxUiLoaderModule } from 'ngx-ui-loader';
 
 @Component({
   selector: 'app-root',
@@ -21,12 +22,12 @@ import { AuthService } from './core/services/auth.service';
     ConstantConfigModalComponent,
     SupportWidgetComponent,
     ClientInfoModalComponent,
+    NgxUiLoaderModule,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
 export class App {
-  title = 'My Ecom GST';
+  title = 'MyEcomGST';
   readonly auth = inject(AuthService);
 }
-
