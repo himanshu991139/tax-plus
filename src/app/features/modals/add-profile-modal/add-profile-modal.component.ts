@@ -111,10 +111,7 @@ export class AddProfileModalComponent {
     this.hasAttemptedSubmit.set(false);
     this.detectedState.set(null);
   }
-
-  onBackdropClick(event: MouseEvent): void {
-    if ((event.target as HTMLElement).classList.contains('modal-overlay')) {
-      this.state.closeAddProfileModal();
-    }
+  onBackdropClick(event?: MouseEvent): void {
+    // Intentionally disabled: dialog only closes via close button or icon
   }
 }

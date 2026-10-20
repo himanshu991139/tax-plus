@@ -107,6 +107,126 @@ export class GstApiService {
   }
 
   /**
+   * Combines Meesho and Amazon GSTR-1 payloads via backend API POST /api/v1/gst/combine
+   */
+  combinePayloads(meesho: Gstr1Payload, amazon: Gstr1Payload): Observable<Gstr1Payload> {
+    const combineUrl = apiUrl('/api/v1/gst/combine');
+    return this.http.post<Gstr1Payload>(combineUrl, { meesho, amazon }).pipe(
+      catchError((error: HttpErrorResponse) => {
+        let errorMessage = 'Failed to combine platform reports.';
+        if (error.error && typeof error.error === 'object' && error.error.message) {
+          errorMessage = error.error.message;
+        } else if (typeof error.error === 'string') {
+          errorMessage = error.error;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        return throwError(() => new Error(errorMessage));
+      })
+    );
+  }
+
+  /**
+   * Fast client-side combination of Meesho and Amazon payloads into a unified GSTR-1 payload.
+   */
+  combinePayloadsLocally(meesho: Gstr1Payload, amazon: Gstr1Payload): Gstr1Payload {
+    if (!meesho && !amazon) return {} as Gstr1Payload;
+    if (!meesho) return amazon;
+    if (!amazon) return meesho;
+
+    const roundVal = (v: number) => Math.round(v * 100) / 100;
+
+    // 1. Merge Table 7: B2CS items
+    const b2csMap = new Map<string, any>();
+    const addItems = (items: any[]) => {
+      if (!items) return;
+      for (const item of items) {
+        const key = `${item.pos}_${item.rt}`;
+        if (!b2csMap.has(key)) {
+          b2csMap.set(key, {
+            sply_ty: item.sply_ty,
+            rt: item.rt,
+            typ: item.typ || 'OE',
+            pos: item.pos,
+            txval: 0,
+            iamt: 0,
+            camt: 0,
+            samt: 0,
+            csamt: 0,
+          });
+        }
+        const b = b2csMap.get(key);
+        b.txval = roundVal(b.txval + (item.txval || 0));
+        if (item.iamt) b.iamt = roundVal(b.iamt + item.iamt);
+        if (item.camt) b.camt = roundVal(b.camt + item.camt);
+        if (item.samt) b.samt = roundVal(b.samt + item.samt);
+      }
+    };
+
+    addItems(meesho.b2cs || []);
+    addItems(amazon.b2cs || []);
+
+    const combinedB2cs = Array.from(b2csMap.values())
+      .filter((b) => b.txval !== 0)
+      .sort((a, b) => a.pos.localeCompare(b.pos))
+      .map((b) => {
+        const rate = Number(b.rt) || 18;
+        const res: any = {
+          sply_ty: b.sply_ty,
+          rt: b.rt,
+          typ: b.typ,
+          pos: b.pos,
+          txval: b.txval,
+        };
+        if (b.sply_ty === 'INTRA') {
+          const calculatedHalf = roundVal(b.txval * (rate / 200));
+          res.camt = Math.max(b.camt, calculatedHalf);
+          res.samt = Math.max(b.samt, calculatedHalf);
+        } else {
+          const calculatedTax = roundVal(b.txval * (rate / 100));
+          res.iamt = Math.max(b.iamt, calculatedTax);
+        }
+        res.csamt = 0;
+        return res;
+      });
+
+    // 2. Merge Table 12: HSN Summary (Amazon HSN first, then Meesho HSN)
+    const allHsn = [...(amazon.hsn?.hsn_b2c || []), ...(meesho.hsn?.hsn_b2c || [])];
+    const combinedHsn = allHsn.map((h, i) => ({ ...h, num: i + 1 }));
+
+    // 3. Merge Table 14: SUPECO (Amazon ECO first, then Meesho ECO)
+    const combinedSupeco = [...(amazon.supeco?.clttx || []), ...(meesho.supeco?.clttx || [])];
+
+    // 4. Merge Table 13: DOC ISSUE (doc 1 is Meesho docs, doc 2 is Amazon docs)
+    const allDocs: any[] = [];
+    let docSeq = 1;
+    (meesho.doc_issue?.doc_det?.[0]?.docs || []).forEach((d) => allDocs.push({ ...d, num: docSeq++ }));
+    (amazon.doc_issue?.doc_det?.[0]?.docs || []).forEach((d) => allDocs.push({ ...d, num: docSeq++ }));
+
+    return {
+      gstin: meesho.gstin || amazon.gstin,
+      fp: meesho.fp || amazon.fp,
+      version: 'GST3.2.3',
+      hash: 'hash',
+      b2cs: combinedB2cs,
+      hsn: combinedHsn.length > 0 ? { hsn_b2c: combinedHsn } : undefined,
+      supeco: combinedSupeco.length > 0 ? { clttx: combinedSupeco } : undefined,
+      doc_issue:
+        allDocs.length > 0
+          ? {
+              doc_det: [
+                {
+                  doc_num: 1,
+                  doc_typ: 'Invoices for outward supply',
+                  docs: allDocs,
+                },
+              ],
+            }
+          : undefined,
+    };
+  }
+
+  /**
    * Generic helper: POSTs a multipart form to a convert endpoint with shared error handling.
    */
   private postConvertForm(url: string, formData: FormData): Observable<Gstr1Payload> {

@@ -1,8 +1,16 @@
-    <div class="platform-card">
+    <div class="platform-card" [class.is-uploaded]="state.isPlatformUploaded(platform().id)">
       <!-- Card Header Banner -->
       <div class="card-header">
         <span class="type-badge">{{ platform().badge }}</span>
-        <span class="frequency-label">{{ platform().filingFrequency }}</span>
+        <div class="d-flex align-items-center gap-2">
+          @if (state.isPlatformUploaded(platform().id)) {
+            <span class="uploaded-pill">
+              <app-icon name="check-circle" [size]="12"></app-icon>
+              <span>Uploaded</span>
+            </span>
+          }
+          <span class="frequency-label">{{ platform().filingFrequency }}</span>
+        </div>
       </div>
 
       <!-- Card Body -->
@@ -19,15 +27,23 @@
           <p class="platform-tagline">{{ platform().tagline }}</p>
         }
 
+        @if (state.isPlatformUploaded(platform().id)) {
+          <div class="platform-uploaded-alert">
+            <app-icon name="check" [size]="14"></app-icon>
+            <span>Report processed &amp; ready</span>
+          </div>
+        }
+
         <!-- Upload Button -->
         <button
           type="button"
           class="btn-upload"
+          [class.btn-reupload]="state.isPlatformUploaded(platform().id)"
           (click)="onUploadClick()"
           [title]="platform().hasApiIntegration ? 'Upload and Convert Reports' : 'Upload Data for ' + platform().name"
         >
-          <app-icon name="cloud-upload" [size]="16"></app-icon>
-          <span>Upload Data</span>
+          <app-icon [name]="state.isPlatformUploaded(platform().id) ? 'refresh-cw' : 'cloud-upload'" [size]="16"></app-icon>
+          <span>{{ state.isPlatformUploaded(platform().id) ? 'Re-upload Data' : 'Upload Data' }}</span>
         </button>
       </div>
     </div>

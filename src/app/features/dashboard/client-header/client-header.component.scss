@@ -259,3 +259,16 @@
     grid-template-columns: 1fr !important;
   }
 }
+
+      .uploaded-summary-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #f0fdf4;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        margin-right: auto;
+      }

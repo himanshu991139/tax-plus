@@ -36,10 +36,7 @@ export class ClientInfoModalComponent {
   confirmImport(): void {
     this.state.confirmProfileImport(this.selectedMonth, this.selectedYear);
   }
-
-  onBackdropClick(event: MouseEvent): void {
-    if ((event.target as HTMLElement).classList.contains('modal-overlay')) {
-      this.state.closeClientInfoModal();
-    }
+  onBackdropClick(event?: MouseEvent): void {
+    // Intentionally disabled: dialog only closes via close button or icon
   }
 }

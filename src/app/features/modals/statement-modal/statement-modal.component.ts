@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -7,7 +7,7 @@ import { GstApiService } from '../../../core/services/gst-api.service';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { InrCurrencyPipe } from '../../../shared/pipes/inr-currency.pipe';
 import { getStateName } from '../../../core/utils/state-codes';
-import { Gstr1Payload } from '../../../core/models/gstr1.model';
+import { Gstr1Payload, Gstr1Summary } from '../../../core/models/gstr1.model';
 
 @Component({
   selector: 'app-statement-modal',
@@ -21,13 +21,49 @@ export class StatementModalComponent {
   private readonly gstApi = inject(GstApiService);
 
   readonly isCopied = signal<boolean>(false);
+  readonly activeView = signal<'combined' | 'meesho' | 'amazon'>('combined');
 
-  summary() {
-    return this.state.gstr1Summary();
+  // Platform Payloads
+  readonly meeshoPayload = computed<Gstr1Payload | null>(() => this.state.meeshoPayload());
+  readonly amazonPayload = computed<Gstr1Payload | null>(() => this.state.amazonPayload());
+  readonly combinedPayload = computed<Gstr1Payload | null>(() => this.state.gstr1Payload());
+
+  // Platform-wise & Combined Summaries for the top summary panel
+  readonly meeshoSummary = computed<Gstr1Summary | null>(() => {
+    const p = this.meeshoPayload();
+    return p ? this.gstApi.calculateSummary(p) : null;
+  });
+
+  readonly amazonSummary = computed<Gstr1Summary | null>(() => {
+    const p = this.amazonPayload();
+    return p ? this.gstApi.calculateSummary(p) : null;
+  });
+
+  readonly combinedSummary = computed<Gstr1Summary | null>(() => {
+    const p = this.combinedPayload();
+    return p ? this.gstApi.calculateSummary(p) : null;
+  });
+
+  // Effective payload viewed in the detailed tables below
+  readonly activePayload = computed<Gstr1Payload | null>(() => {
+    const view = this.activeView();
+    if (view === 'meesho') return this.meeshoPayload() || this.combinedPayload();
+    if (view === 'amazon') return this.amazonPayload() || this.combinedPayload();
+    return this.combinedPayload();
+  });
+
+  readonly summary = computed<Gstr1Summary | null>(() => {
+    const payload = this.activePayload();
+    if (!payload) return null;
+    return this.gstApi.calculateSummary(payload);
+  });
+
+  setView(view: 'combined' | 'meesho' | 'amazon'): void {
+    this.activeView.set(view);
   }
 
   formattedJson(): string {
-    const payload = this.state.gstr1Payload();
+    const payload = this.activePayload();
     return payload ? JSON.stringify(payload, null, 2) : '';
   }
 
@@ -35,16 +71,19 @@ export class StatementModalComponent {
     return getStateName(pos);
   }
 
-  onBackdropClick(event: MouseEvent): void {
-    if ((event.target as HTMLElement).classList.contains('modal-overlay')) {
-      this.state.closeStatementModal();
-    }
-  }
-
   downloadJson(): void {
-    const payload = this.state.gstr1Payload();
+    const payload = this.activePayload();
     if (payload) {
-      this.gstApi.downloadJsonFile(payload, `GSTR1_Meesho_${this.state.clientInfo().periodCode}.json`);
+      const period = this.state.clientInfo().periodCode || 'return';
+      let prefix = 'Combined';
+      if (this.activeView() === 'meesho') prefix = 'Meesho';
+      else if (this.activeView() === 'amazon') prefix = 'Amazon';
+      else if (this.state.hasBothData()) prefix = 'Combined';
+      else if (this.state.hasMeeshoData()) prefix = 'Meesho';
+      else if (this.state.hasAmazonData()) prefix = 'Amazon';
+
+      this.gstApi.downloadJsonFile(payload, `GSTR1_${prefix}_${period}.json`);
+      this.state.showToast(`GSTR-1 JSON (${prefix}) downloaded successfully!`, 'success');
     }
   }
 
@@ -59,9 +98,11 @@ export class StatementModalComponent {
 
   openUploadModal(): void {
     this.state.closeStatementModal();
-    const meesho = this.state.platforms().find((p) => p.id === 'meesho-b2c');
-    if (meesho) {
-      this.state.openUploadModal(meesho);
+    const platform = this.state.hasMeeshoData() && !this.state.hasAmazonData()
+      ? this.state.platforms().find((p) => p.id === 'amazon-b2c')
+      : this.state.platforms().find((p) => p.id === 'meesho-b2c');
+    if (platform) {
+      this.state.openUploadModal(platform);
     }
   }
 }

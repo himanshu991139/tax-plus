@@ -69,10 +69,7 @@ export class ConstantConfigModalComponent {
     const n = Number.isFinite(Number(value)) ? Math.round(Number(value)) : min;
     return Math.min(max, Math.max(min, n));
   }
-
-  onBackdropClick(event: MouseEvent): void {
-    if ((event.target as HTMLElement).classList.contains('modal-overlay')) {
-      this.state.closeConstantConfigModal();
-    }
+  onBackdropClick(event?: MouseEvent): void {
+    // Intentionally disabled: dialog only closes via close button or icon
   }
 }

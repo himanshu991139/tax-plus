@@ -210,8 +210,19 @@ p.gstin.toLowerCase().includes(query);
     });
   });
 
-  // Converted GSTR-1 Data
-  readonly gstr1Payload = signal<Gstr1Payload | null>(null);
+  // Converted GSTR-1 Data per platform
+  readonly meeshoPayload = signal<Gstr1Payload | null>(null);
+  readonly amazonPayload = signal<Gstr1Payload | null>(null);
+
+  // Effective GSTR-1 return (Combined if both uploaded, or individual)
+  readonly gstr1Payload = computed<Gstr1Payload | null>(() => {
+    const meesho = this.meeshoPayload();
+    const amazon = this.amazonPayload();
+    if (meesho && amazon) {
+      return this.gstApi.combinePayloadsLocally(meesho, amazon);
+    }
+    return meesho || amazon || null;
+  });
   readonly gstr1Summary = computed<Gstr1Summary | null>(() => {
     const payload = this.gstr1Payload();
     if (!payload) return null;
@@ -378,7 +389,8 @@ p.gstin.toLowerCase().includes(query);
     this.setActiveProfile(updated);
 
     if (changed) {
-      this.gstr1Payload.set(null);
+      this.meeshoPayload.set(null);
+      this.amazonPayload.set(null);
     }
 
     return { changed, sameGstin, samePeriod, period, periodCode };
@@ -455,8 +467,54 @@ p.gstin.toLowerCase().includes(query);
     this.isSupportModalOpen.set(false);
   }
 
-  setGstr1Payload(payload: Gstr1Payload): void {
-    this.gstr1Payload.set(payload);
+  setMeeshoPayload(payload: Gstr1Payload | null): void {
+    this.meeshoPayload.set(payload);
+  }
+
+  setAmazonPayload(payload: Gstr1Payload | null): void {
+    this.amazonPayload.set(payload);
+  }
+
+  setGstr1Payload(payload: Gstr1Payload | null): void {
+    const selected = this.selectedPlatform();
+    if (selected?.id === 'amazon-b2c') {
+      this.amazonPayload.set(payload);
+    } else {
+      this.meeshoPayload.set(payload);
+    }
+  }
+
+  clearUploadedData(): void {
+    this.meeshoPayload.set(null);
+    this.amazonPayload.set(null);
+    this.showToast('Uploaded platform reports cleared.', 'info');
+  }
+
+  isPlatformUploaded(platformId: string): boolean {
+    if (platformId === 'meesho-b2c') return this.meeshoPayload() !== null;
+    if (platformId === 'amazon-b2c') return this.amazonPayload() !== null;
+    return false;
+  }
+
+  hasMeeshoData(): boolean {
+    return this.meeshoPayload() !== null;
+  }
+
+  hasAmazonData(): boolean {
+    return this.amazonPayload() !== null;
+  }
+
+  hasBothData(): boolean {
+    return this.meeshoPayload() !== null && this.amazonPayload() !== null;
+  }
+
+  uploadedPlatformsSummary(): string {
+    const hasM = this.hasMeeshoData();
+    const hasA = this.hasAmazonData();
+    if (hasM && hasA) return 'Meesho & Amazon (Combined)';
+    if (hasM) return 'Meesho Only';
+    if (hasA) return 'Amazon Only';
+    return '';
   }
 
   showToast(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info'): void {

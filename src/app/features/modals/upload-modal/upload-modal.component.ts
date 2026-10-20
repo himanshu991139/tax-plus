@@ -41,51 +41,17 @@ export class UploadModalComponent {
     return this.state.selectedPlatform()?.id === 'amazon-b2c';
   }
 
-  onBackdropClick(event: MouseEvent): void {
-    if ((event.target as HTMLElement).classList.contains('modal-overlay')) {
-      this.state.closeUploadModal();
-    }
+  onBackdropClick(event?: MouseEvent): void {
+    // Intentionally disabled: dialog only closes via close button or icon
   }
 
   /**
-   * Expected base file names for Meesho reports (without extension).
-   * The dialog only accepts files whose name matches one of these exactly.
+   * Allowed extensions for report files.
+   * File-name validation (exact base name matching) has been removed —
+   * any file with a supported extension is accepted for both Amazon and Meesho.
    */
-  private static readonly MEESHO_FILE_MAP: Record<'sales' | 'return' | 'invoice', string> = {
-    sales: 'tcs_sales',
-    return: 'tcs_sales_return',
-    invoice: 'tax_invoice_details',
-  };
-
-  /**
-   * Expected base file name for Amazon MTR B2C report.
-   */
-  private static readonly AMAZON_FILE_NAME = 'MTR';
-
   private static readonly ALLOWED_EXTENSIONS = ['.csv', '.xlsx', '.xls'];
   private static readonly MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
-
-  /**
-   * Checks whether the given file name matches the expected Meesho base name
-   * (e.g. "Tax_invoice_details.xlsx" or "tax_invoice_details.csv" matches "tax_invoice_details").
-   * Matching is case-insensitive and trims whitespace.
-   */
-  isMeeshoFileName(fileName: string, type: 'sales' | 'return' | 'invoice'): boolean {
-    const expectedBase = UploadModalComponent.MEESHO_FILE_MAP[type].toLowerCase();
-    const dotIndex = fileName.lastIndexOf('.');
-    const baseName = (dotIndex > 0 ? fileName.substring(0, dotIndex) : fileName).trim().toLowerCase();
-    return baseName === expectedBase;
-  }
-
-  /**
-   * Checks whether the given file name matches the expected Amazon MTR base name.
-   */
-  isAmazonFileName(fileName: string): boolean {
-    const expectedBase = UploadModalComponent.AMAZON_FILE_NAME.toLowerCase();
-    const dotIndex = fileName.lastIndexOf('.');
-    const baseName = (dotIndex > 0 ? fileName.substring(0, dotIndex) : fileName).trim().toLowerCase();
-    return baseName === expectedBase;
-  }
 
   onFileSelected(event: Event, type: 'sales' | 'return' | 'invoice' | 'amazonMtr'): void {
     const input = event.target as HTMLInputElement;
@@ -112,28 +78,9 @@ export class UploadModalComponent {
       }
 
       if (type === 'amazonMtr') {
-        // Amazon: validate exact file name
-        if (!this.isAmazonFileName(file.name)) {
-          this.errorMessage.set(
-            `This is an Amazon upload. The MTR file must be named exactly "${UploadModalComponent.AMAZON_FILE_NAME}", but got "${file.name}".
-             Please rename the file or choose the correct Amazon MTR report.`
-          );
-          input.value = '';
-          return;
-        }
         this.errorMessage.set(null);
         this.amazonMtrFile.set(file);
       } else {
-        // Meesho: validate exact file name
-        if (!this.isMeeshoFileName(file.name, type)) {
-          const expected = UploadModalComponent.MEESHO_FILE_MAP[type];
-          this.errorMessage.set(
-            `This is a Meesho upload. The file must be named exactly "${expected}", but got "${file.name}".
-             Please rename the file or choose the correct Meesho report.`
-          );
-          input.value = '';
-          return;
-        }
         this.errorMessage.set(null);
         if (type === 'sales') this.salesFile.set(file);
         else if (type === 'return') this.returnFile.set(file);

@@ -60,10 +60,7 @@ export class SupportWidgetComponent {
     this.hasAttemptedSubmit.set(false);
     this.state.showToast('Support ticket created successfully!', 'success');
   }
-
-  onBackdropClick(event: MouseEvent): void {
-    if ((event.target as HTMLElement).classList.contains('modal-overlay')) {
-      this.state.closeSupportModal();
-    }
+  onBackdropClick(event?: MouseEvent): void {
+    // Intentionally disabled: dialog only closes via close button or icon
   }
 }

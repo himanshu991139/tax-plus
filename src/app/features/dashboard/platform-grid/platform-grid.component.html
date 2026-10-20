@@ -1,7 +1,7 @@
     @if (state.filteredPlatforms().length > 0) {
       <div class="platforms-grid">
         @for (platform of state.filteredPlatforms(); track platform.id) {
-          @if (platform.id === 'meesho-b2c') {
+          @if (platform.id === 'meesho-b2c' || platform.id === 'amazon-b2c') {
             <app-platform-card [platform]="platform"></app-platform-card>
           }
         }

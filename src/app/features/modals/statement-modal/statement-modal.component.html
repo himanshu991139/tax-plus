@@ -1,5 +1,5 @@
     @if (state.isStatementModalOpen()) {
-      <div class="modal-overlay" (click)="onBackdropClick($event)">
+      <div class="modal-overlay">
         <div class="modal-dialog-large" (click)="$event.stopPropagation()">
           <!-- Header -->
           <div class="modal-header-custom">
@@ -15,13 +15,13 @@
             </div>
 
             <div class="d-flex align-items-center gap-2">
-              @if (state.gstr1Payload()) {
+              @if (activePayload()) {
                 <button type="button" class="btn btn-sm btn-outline-light d-flex align-items-center gap-1" (click)="downloadJson()">
                   <app-icon name="download" [size]="14"></app-icon>
                   <span>Export JSON</span>
                 </button>
               }
-              <button type="button" class="btn-close-custom" (click)="state.closeStatementModal()" aria-label="Close">
+              <button type="button" class="btn-close-custom" (click)="state.closeStatementModal()" aria-label="Close" title="Close">
                 <app-icon name="x" [size]="18"></app-icon>
               </button>
             </div>
@@ -29,28 +29,134 @@
 
           <!-- Body -->
           <div class="modal-body-custom">
-            @if (state.gstr1Payload(); as gstr1) {
-              <!-- Top Tax Summary Table -->
-              <div class="summary-table-container mb-4">
+            @if (activePayload(); as gstr1) {
+              <!-- Top Tax Summary Table: Platform-Wise & Combined -->
+              <div class="summary-table-container mb-3">
                 <table class="summary-strip-table">
                   <thead>
                     <tr>
-                      <th>Taxable Value</th>
-                      <th>Integrated tax</th>
-                      <th>Central tax</th>
-                      <th>State/UT tax</th>
+                      <th class="ps-3" style="width: 200px;">Platform</th>
+                      <th class="text-end">Taxable Value</th>
+                      <th class="text-end">Integrated tax</th>
+                      <th class="text-end">Central tax</th>
+                      <th class="text-end">State/UT tax</th>
+                      <th class="text-end pe-3">Total Tax</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td>{{ summary()?.totalTaxableValue | inrCurrency }}</td>
-                      <td>{{ summary()?.totalIgst | inrCurrency }}</td>
-                      <td>{{ summary()?.totalCgst | inrCurrency }}</td>
-                      <td>{{ summary()?.totalSgst | inrCurrency }}</td>
-                    </tr>
+                    @if (meeshoSummary(); as ms) {
+                      <tr
+                        class="platform-row"
+                        [class.selected-row]="activeView() === 'meesho'"
+                        (click)="setView('meesho')"
+                        title="Click to view Meesho tables below"
+                      >
+                        <td class="ps-3">
+                          <div class="d-flex align-items-center gap-2">
+                            <span class="platform-badge meesho-badge">Meesho</span>
+                            @if (activeView() === 'meesho') {
+                              <span class="active-pill">Viewing</span>
+                            }
+                          </div>
+                        </td>
+                        <td class="text-end font-mono">{{ ms.totalTaxableValue | inrCurrency }}</td>
+                        <td class="text-end font-mono">{{ ms.totalIgst | inrCurrency }}</td>
+                        <td class="text-end font-mono">{{ ms.totalCgst | inrCurrency }}</td>
+                        <td class="text-end font-mono">{{ ms.totalSgst | inrCurrency }}</td>
+                        <td class="text-end font-mono pe-3 fw-bold text-primary">{{ ms.totalTax | inrCurrency }}</td>
+                      </tr>
+                    }
+
+                    @if (amazonSummary(); as asym) {
+                      <tr
+                        class="platform-row"
+                        [class.selected-row]="activeView() === 'amazon'"
+                        (click)="setView('amazon')"
+                        title="Click to view Amazon tables below"
+                      >
+                        <td class="ps-3">
+                          <div class="d-flex align-items-center gap-2">
+                            <span class="platform-badge amazon-badge">Amazon</span>
+                            @if (activeView() === 'amazon') {
+                              <span class="active-pill">Viewing</span>
+                            }
+                          </div>
+                        </td>
+                        <td class="text-end font-mono">{{ asym.totalTaxableValue | inrCurrency }}</td>
+                        <td class="text-end font-mono">{{ asym.totalIgst | inrCurrency }}</td>
+                        <td class="text-end font-mono">{{ asym.totalCgst | inrCurrency }}</td>
+                        <td class="text-end font-mono">{{ asym.totalSgst | inrCurrency }}</td>
+                        <td class="text-end font-mono pe-3 fw-bold text-primary">{{ asym.totalTax | inrCurrency }}</td>
+                      </tr>
+                    }
+
+                    @if (combinedSummary(); as cs) {
+                      <tr
+                        class="combined-row"
+                        [class.selected-row]="activeView() === 'combined'"
+                        (click)="setView('combined')"
+                        title="Click to view Combined tables below"
+                      >
+                        <td class="ps-3">
+                          <div class="d-flex align-items-center gap-2">
+                            <span class="platform-badge combined-badge">
+                              {{ state.hasBothData() ? 'Combined (Total)' : 'Total Statement' }}
+                            </span>
+                            @if (activeView() === 'combined') {
+                              <span class="active-pill">Viewing</span>
+                            }
+                          </div>
+                        </td>
+                        <td class="text-end font-mono fw-bold text-dark">{{ cs.totalTaxableValue | inrCurrency }}</td>
+                        <td class="text-end font-mono fw-bold text-dark">{{ cs.totalIgst | inrCurrency }}</td>
+                        <td class="text-end font-mono fw-bold text-dark">{{ cs.totalCgst | inrCurrency }}</td>
+                        <td class="text-end font-mono fw-bold text-dark">{{ cs.totalSgst | inrCurrency }}</td>
+                        <td class="text-end font-mono pe-3 fw-bolder text-navy fs-6">{{ cs.totalTax | inrCurrency }}</td>
+                      </tr>
+                    }
                   </tbody>
                 </table>
               </div>
+
+              @if (state.hasBothData()) {
+                <div class="view-switch-banner d-flex align-items-center justify-content-between mb-3 px-3 py-2 rounded bg-light border">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="small fw-semibold text-secondary">Table Details:</span>
+                    <div class="btn-group btn-group-sm" role="group">
+                      <button
+                        type="button"
+                        class="btn"
+                        [class.btn-navy]="activeView() === 'combined'"
+                        [class.btn-outline-secondary]="activeView() !== 'combined'"
+                        (click)="setView('combined')"
+                      >
+                        Combined (Both)
+                      </button>
+                      <button
+                        type="button"
+                        class="btn"
+                        [class.btn-navy]="activeView() === 'meesho'"
+                        [class.btn-outline-secondary]="activeView() !== 'meesho'"
+                        (click)="setView('meesho')"
+                      >
+                        Meesho Only
+                      </button>
+                      <button
+                        type="button"
+                        class="btn"
+                        [class.btn-navy]="activeView() === 'amazon'"
+                        [class.btn-outline-secondary]="activeView() !== 'amazon'"
+                        (click)="setView('amazon')"
+                      >
+                        Amazon Only
+                      </button>
+                    </div>
+                  </div>
+                  <span class="text-muted small">
+                    Showing {{ activeView() === 'combined' ? 'Combined GSTR-1' : (activeView() === 'meesho' ? 'Meesho' : 'Amazon') }} tables
+                  </span>
+                </div>
+              }
 
               <!-- Mat Tabs for Tables -->
               <mat-tab-group animationDuration="150ms">
@@ -160,6 +266,7 @@
                         <thead class="table-light">
                           <tr>
                             <th>E-Commerce Operator GSTIN (ETIN)</th>
+                            <th>Platform</th>
                             <th class="text-end">Supplies Value (₹)</th>
                             <th class="text-end">IGST (₹)</th>
                             <th class="text-end">CGST (₹)</th>
@@ -170,7 +277,12 @@
                         <tbody>
                           @for (eco of gstr1.supeco?.clttx; track $index) {
                             <tr>
-                              <td class="font-mono fw-bold">{{ eco.etin }} (Meesho)</td>
+                              <td class="font-mono fw-bold">{{ eco.etin }}</td>
+                              <td>
+                                <span class="badge" [class.bg-pink-subtle]="eco.etin.includes('AARCM')" [class.bg-warning-subtle]="eco.etin.includes('AAICA')">
+                                  {{ eco.etin.includes('AAICA') ? 'Amazon' : (eco.etin.includes('AARCM') ? 'Meesho' : 'ECO') }}
+                                </span>
+                              </td>
                               <td class="text-end font-mono text-primary">{{ eco.suppval | inrCurrency: false }}</td>
                               <td class="text-end font-mono">{{ eco.igst || 0 | inrCurrency: false }}</td>
                               <td class="text-end font-mono">{{ eco.cgst || 0 | inrCurrency: false }}</td>
@@ -240,8 +352,7 @@
                 </div>
                 <h4 class="fw-bold text-dark">No statement data generated yet</h4>
                 <p class="text-muted small max-w-400 mx-auto mb-4">
-                  Upload your Meesho sales or return reports to convert them into a verified GSTR-1 statement, or load
-                  sample data to explore the statement.
+                  Upload your Meesho or Amazon reports to convert them into a verified GSTR-1 statement.
                 </p>
                 <button
                   type="button"
@@ -249,10 +360,26 @@
                   (click)="openUploadModal()"
                 >
                   <app-icon name="cloud-upload" [size]="16"></app-icon>
-                  <span>Upload Meesho Data</span>
+                  <span>Upload Platform Data</span>
                 </button>
               </div>
             }
+          </div>
+
+          <!-- Footer -->
+          <div class="modal-footer-custom d-flex justify-content-between align-items-center px-4 py-3 border-top bg-light">
+            <span class="text-muted small">Generated according to official GST Portal schema (GST3.2.3)</span>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-outline-secondary px-3" (click)="state.closeStatementModal()">
+                Close
+              </button>
+              @if (activePayload()) {
+                <button type="button" class="btn btn-primary-navy d-flex align-items-center gap-1 px-3" (click)="downloadJson()">
+                  <app-icon name="download" [size]="14"></app-icon>
+                  <span>Export JSON</span>
+                </button>
+              }
+            </div>
           </div>
         </div>
       </div>
