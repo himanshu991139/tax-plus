@@ -95,9 +95,24 @@ export class GstApiService {
    * Sends multipart form data to convert Meesho reports into GSTR-1 JSON
    */
   convertMeesho(formData: FormData): Observable<Gstr1Payload> {
-    return this.http.post<Gstr1Payload>(this.convertUrl, formData).pipe(
+    return this.postConvertForm(this.convertUrl, formData);
+  }
+
+  /**
+   * Converts Amazon MTR (Merchant Tax Report) B2C data into GSTR-1 JSON.
+   */
+  convertAmazon(formData: FormData): Observable<Gstr1Payload> {
+    const amazonUrl = apiUrl('/api/v1/gst/convert-amazon');
+    return this.postConvertForm(amazonUrl, formData);
+  }
+
+  /**
+   * Generic helper: POSTs a multipart form to a convert endpoint with shared error handling.
+   */
+  private postConvertForm(url: string, formData: FormData): Observable<Gstr1Payload> {
+    return this.http.post<Gstr1Payload>(url, formData).pipe(
       catchError((error: HttpErrorResponse) => {
-        let errorMessage = 'Failed to convert Meesho reports.';
+        let errorMessage = `Failed to convert reports.`;
         if (error.error && typeof error.error === 'object' && error.error.message) {
           errorMessage = error.error.message;
         } else if (typeof error.error === 'string') {

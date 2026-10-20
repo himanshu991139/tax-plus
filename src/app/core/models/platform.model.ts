@@ -43,7 +43,7 @@ export const PLATFORMS_DATA: Platform[] = [
     filingFrequency: 'MONTHLY',
     logoType: 'amazon',
     status: 'active',
-    hasApiIntegration: false,
+    hasApiIntegration: true,
     tagline: 'MTR (Merchant Tax Report) B2C import',
     order: 3,
   },

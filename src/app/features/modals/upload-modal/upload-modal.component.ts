@@ -26,15 +26,25 @@ export class UploadModalComponent {
   readonly state = inject(ClientStateService);
   private readonly gstApi = inject(GstApiService);
 
+  // For Meesho: 3 files (tcs_sales, tcs_sales_return, tax_invoice_details)
+  // For Amazon: 1 file (MTR B2C report)
   readonly salesFile = signal<File | null>(null);
   readonly returnFile = signal<File | null>(null);
   readonly invoiceFile = signal<File | null>(null);
+  readonly amazonMtrFile = signal<File | null>(null);
 
   readonly isSubmitting = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
 
   currentPlatformLogo(): string {
     return this.state.selectedPlatform()?.logoType || 'meesho';
+  }
+
+  /**
+   * Whether the currently selected platform is Amazon.
+   */
+  isAmazonPlatform(): boolean {
+    return this.state.selectedPlatform()?.id === 'amazon-b2c';
   }
 
   onBackdropClick(event: MouseEvent): void {
@@ -53,6 +63,11 @@ export class UploadModalComponent {
     invoice: 'tax_invoice_details',
   };
 
+  /**
+   * Expected base file name for Amazon MTR B2C report.
+   */
+  private static readonly AMAZON_FILE_NAME = 'MTR';
+
   private static readonly ALLOWED_EXTENSIONS = ['.csv', '.xlsx', '.xls'];
   private static readonly MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 
@@ -68,7 +83,17 @@ export class UploadModalComponent {
     return baseName === expectedBase;
   }
 
-  onFileSelected(event: Event, type: 'sales' | 'return' | 'invoice'): void {
+  /**
+   * Checks whether the given file name matches the expected Amazon MTR base name.
+   */
+  isAmazonFileName(fileName: string): boolean {
+    const expectedBase = UploadModalComponent.AMAZON_FILE_NAME.toLowerCase();
+    const dotIndex = fileName.lastIndexOf('.');
+    const baseName = (dotIndex > 0 ? fileName.substring(0, dotIndex) : fileName).trim().toLowerCase();
+    return baseName === expectedBase;
+  }
+
+  onFileSelected(event: Event, type: 'sales' | 'return' | 'invoice' | 'amazonMtr'): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
@@ -92,25 +117,46 @@ export class UploadModalComponent {
         return;
       }
 
-      // Validate that the file is named exactly as expected for Meesho
-      if (!this.isMeeshoFileName(file.name, type)) {
-        const expected = UploadModalComponent.MEESHO_FILE_MAP[type];
-        this.errorMessage.set(
-          `This is a Meesho upload. The file must be named exactly "${expected}", but got "${file.name}".
-           Please rename the file or choose the correct Meesho report.`
-        );
-        input.value = '';
-        return;
+      if (type === 'amazonMtr') {
+        // Amazon: validate exact file name
+        if (!this.isAmazonFileName(file.name)) {
+          this.errorMessage.set(
+            `This is an Amazon upload. The MTR file must be named exactly "${UploadModalComponent.AMAZON_FILE_NAME}", but got "${file.name}".
+             Please rename the file or choose the correct Amazon MTR report.`
+          );
+          input.value = '';
+          return;
+        }
+        this.errorMessage.set(null);
+        this.amazonMtrFile.set(file);
+      } else {
+        // Meesho: validate exact file name
+        if (!this.isMeeshoFileName(file.name, type)) {
+          const expected = UploadModalComponent.MEESHO_FILE_MAP[type];
+          this.errorMessage.set(
+            `This is a Meesho upload. The file must be named exactly "${expected}", but got "${file.name}".
+             Please rename the file or choose the correct Meesho report.`
+          );
+          input.value = '';
+          return;
+        }
+        this.errorMessage.set(null);
+        if (type === 'sales') this.salesFile.set(file);
+        else if (type === 'return') this.returnFile.set(file);
+        else if (type === 'invoice') this.invoiceFile.set(file);
       }
-
-      this.errorMessage.set(null);
-      if (type === 'sales') this.salesFile.set(file);
-      else if (type === 'return') this.returnFile.set(file);
-      else if (type === 'invoice') this.invoiceFile.set(file);
     }
   }
 
   submitConversion(): void {
+    if (this.isAmazonPlatform()) {
+      this.submitAmazonConversion();
+    } else {
+      this.submitMeeshoConversion();
+    }
+  }
+
+  private submitMeeshoConversion(): void {
     const sales = this.salesFile();
     const returnF = this.returnFile();
     const invoiceF = this.invoiceFile();
@@ -140,13 +186,50 @@ export class UploadModalComponent {
       next: (payload) => {
         this.isSubmitting.set(false);
         this.state.setGstr1Payload(payload);
-        this.state.showToast('Platform reports submitted successfully! View Statement and Generate & Download GSTR-1 are now available.', 'success');
+        this.state.showToast('Meesho reports submitted successfully! View Statement and Generate & Download GSTR-1 are now available.', 'success');
         this.state.closeUploadModal();
         this.resetFiles();
       },
       error: (err) => {
         this.isSubmitting.set(false);
-        this.errorMessage.set(err.message || 'An error occurred during GST report conversion.');
+        this.errorMessage.set(err.message || 'An error occurred during Meesho GST report conversion.');
+      },
+    });
+  }
+
+  private submitAmazonConversion(): void {
+    const mtrFile = this.amazonMtrFile();
+
+    if (!mtrFile) {
+      this.errorMessage.set('The Amazon MTR (Merchant Tax Report) file is required.');
+      return;
+    }
+
+    this.isSubmitting.set(true);
+    this.errorMessage.set(null);
+
+    const client = this.state.clientInfo();
+    const gstin = client.gstin || '';
+    const period = client.periodCode || '092026';
+    const sellerStateCode = client.sellerStateCode || (gstin.length >= 2 ? gstin.substring(0, 2) : '09');
+
+    const formData = new FormData();
+    formData.append('mtr_file', mtrFile);
+    formData.append('gstin', gstin);
+    formData.append('period', period);
+    formData.append('sellerStateCode', sellerStateCode);
+
+    this.gstApi.convertAmazon(formData).subscribe({
+      next: (payload) => {
+        this.isSubmitting.set(false);
+        this.state.setGstr1Payload(payload);
+        this.state.showToast('Amazon MTR report submitted successfully! View Statement and Generate & Download GSTR-1 are now available.', 'success');
+        this.state.closeUploadModal();
+        this.resetFiles();
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        this.errorMessage.set(err.message || 'An error occurred during Amazon GST report conversion.');
       },
     });
   }
@@ -155,6 +238,7 @@ export class UploadModalComponent {
     this.salesFile.set(null);
     this.returnFile.set(null);
     this.invoiceFile.set(null);
+    this.amazonMtrFile.set(null);
     this.errorMessage.set(null);
   }
 

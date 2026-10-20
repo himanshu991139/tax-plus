@@ -36,110 +36,148 @@
 
             <!-- Upload File Inputs -->
             <div class="file-dropzone-group">
-              <!-- File 1: TCS Sales (Required) -->
-              <div class="dropzone-box" [class.has-file]="salesFile()">
-                <div class="dropzone-header">
-                  <div class="dropzone-title">
-                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle me-1">Required</span>
-                    <span class="meesho-file-icon">📊</span>
-                    <strong>tcs_sales</strong>
-                    <span class="file-ext-hint">.xlsx or .csv</span>
+              @if (isAmazonPlatform()) {
+                <!-- Amazon: Single MTR file -->
+                <div class="dropzone-box" [class.has-file]="amazonMtrFile()">
+                  <div class="dropzone-header">
+                    <div class="dropzone-title">
+                      <span class="badge bg-danger-subtle text-danger border border-danger-subtle me-1">Required</span>
+                      <span class="amazon-file-icon">📦</span>
+                      <strong>MTR</strong>
+                      <span class="file-ext-hint">.xlsx or .csv</span>
+                    </div>
+                    <small class="text-muted">Amazon Merchant Tax Report (MTR) B2C — file must be named exactly <strong>MTR</strong></small>
                   </div>
-                  <small class="text-muted">Meesho forward orders &amp; TCS report — file must be named exactly <strong>tcs_sales</strong></small>
+
+                  @if (amazonMtrFile(); as file) {
+                    <div class="selected-file-pill">
+                      <div class="d-flex align-items-center gap-2">
+                        <app-icon name="excel" [size]="20" class="text-success"></app-icon>
+                        <span class="file-name">{{ file.name }}</span>
+                        <span class="file-size text-muted">({{ formatBytes(file.size) }})</span>
+                        @if (isAmazonFileName(file.name)) {
+                          <app-icon name="check-circle" [size]="16" class="text-success" title="Correct Amazon file name"></app-icon>
+                        }
+                      </div>
+                      <button type="button" class="btn-remove-file" (click)="amazonMtrFile.set(null)">
+                        <app-icon name="x" [size]="14"></app-icon>
+                      </button>
+                    </div>
+                  } @else {
+                    <label class="file-picker-label">
+                      <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event, 'amazonMtr')" />
+                      <app-icon name="cloud-upload" [size]="22" class="text-primary"></app-icon>
+                      <span>Choose file named <strong>MTR</strong> (.xlsx or .csv)</span>
+                    </label>
+                  }
+                </div>
+              } @else {
+                <!-- Meesho: 3 files -->
+                <!-- File 1: TCS Sales (Required) -->
+                <div class="dropzone-box" [class.has-file]="salesFile()">
+                  <div class="dropzone-header">
+                    <div class="dropzone-title">
+                      <span class="badge bg-danger-subtle text-danger border border-danger-subtle me-1">Required</span>
+                      <span class="meesho-file-icon">📊</span>
+                      <strong>tcs_sales</strong>
+                      <span class="file-ext-hint">.xlsx or .csv</span>
+                    </div>
+                    <small class="text-muted">Meesho forward orders &amp; TCS report — file must be named exactly <strong>tcs_sales</strong></small>
+                  </div>
+
+                  @if (salesFile(); as file) {
+                    <div class="selected-file-pill">
+                      <div class="d-flex align-items-center gap-2">
+                        <app-icon name="excel" [size]="20" class="text-success"></app-icon>
+                        <span class="file-name">{{ file.name }}</span>
+                        <span class="file-size text-muted">({{ formatBytes(file.size) }})</span>
+                        @if (isMeeshoFileName(file.name, 'sales')) {
+                          <app-icon name="check-circle" [size]="16" class="text-success" title="Correct Meesho file name"></app-icon>
+                        }
+                      </div>
+                      <button type="button" class="btn-remove-file" (click)="salesFile.set(null)">
+                        <app-icon name="x" [size]="14"></app-icon>
+                      </button>
+                    </div>
+                  } @else {
+                    <label class="file-picker-label">
+                      <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event, 'sales')" />
+                      <app-icon name="cloud-upload" [size]="22" class="text-primary"></app-icon>
+                      <span>Choose file named <strong>tcs_sales</strong> (.xlsx or .csv)</span>
+                    </label>
+                  }
                 </div>
 
-                @if (salesFile(); as file) {
-                  <div class="selected-file-pill">
-                    <div class="d-flex align-items-center gap-2">
-                      <app-icon name="excel" [size]="20" class="text-success"></app-icon>
-                      <span class="file-name">{{ file.name }}</span>
-                      <span class="file-size text-muted">({{ formatBytes(file.size) }})</span>
-                      @if (isMeeshoFileName(file.name, 'sales')) {
-                        <app-icon name="check-circle" [size]="16" class="text-success" title="Correct Meesho file name"></app-icon>
-                      }
+                <!-- File 2: TCS Sales Return (Required) -->
+                <div class="dropzone-box mt-3" [class.has-file]="returnFile()">
+                  <div class="dropzone-header">
+                    <div class="dropzone-title">
+                      <span class="badge bg-danger-subtle text-danger border border-danger-subtle me-1">Required</span>
+                      <span class="meesho-file-icon">↩️</span>
+                      <strong>tcs_sales_return</strong>
+                      <span class="file-ext-hint">.xlsx or .csv</span>
                     </div>
-                    <button type="button" class="btn-remove-file" (click)="salesFile.set(null)">
-                      <app-icon name="x" [size]="14"></app-icon>
-                    </button>
+                    <small class="text-muted">Customer returns &amp; RTOs report — file must be named exactly <strong>tcs_sales_return</strong></small>
                   </div>
-                } @else {
-                  <label class="file-picker-label">
-                    <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event, 'sales')" />
-                    <app-icon name="cloud-upload" [size]="22" class="text-primary"></app-icon>
-                    <span>Choose file named <strong>tcs_sales</strong> (.xlsx or .csv)</span>
-                  </label>
-                }
-              </div>
 
-              <!-- File 2: TCS Sales Return (Required) -->
-              <div class="dropzone-box mt-3" [class.has-file]="returnFile()">
-                <div class="dropzone-header">
-                  <div class="dropzone-title">
-                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle me-1">Required</span>
-                    <span class="meesho-file-icon">↩️</span>
-                    <strong>tcs_sales_return</strong>
-                    <span class="file-ext-hint">.xlsx or .csv</span>
-                  </div>
-                  <small class="text-muted">Customer returns &amp; RTOs report — file must be named exactly <strong>tcs_sales_return</strong></small>
+                  @if (returnFile(); as file) {
+                    <div class="selected-file-pill">
+                      <div class="d-flex align-items-center gap-2">
+                        <app-icon name="excel" [size]="20" class="text-warning"></app-icon>
+                        <span class="file-name">{{ file.name }}</span>
+                        <span class="file-size text-muted">({{ formatBytes(file.size) }})</span>
+                        @if (isMeeshoFileName(file.name, 'return')) {
+                          <app-icon name="check-circle" [size]="16" class="text-success" title="Correct Meesho file name"></app-icon>
+                        }
+                      </div>
+                      <button type="button" class="btn-remove-file" (click)="returnFile.set(null)">
+                        <app-icon name="x" [size]="14"></app-icon>
+                      </button>
+                    </div>
+                  } @else {
+                    <label class="file-picker-label">
+                      <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event, 'return')" />
+                      <app-icon name="cloud-upload" [size]="22" class="text-secondary"></app-icon>
+                      <span>Choose file named <strong>tcs_sales_return</strong> (.xlsx or .csv)</span>
+                    </label>
+                  }
                 </div>
 
-                @if (returnFile(); as file) {
-                  <div class="selected-file-pill">
-                    <div class="d-flex align-items-center gap-2">
-                      <app-icon name="excel" [size]="20" class="text-warning"></app-icon>
-                      <span class="file-name">{{ file.name }}</span>
-                      <span class="file-size text-muted">({{ formatBytes(file.size) }})</span>
-                      @if (isMeeshoFileName(file.name, 'return')) {
-                        <app-icon name="check-circle" [size]="16" class="text-success" title="Correct Meesho file name"></app-icon>
-                      }
+                <!-- File 3: Tax Invoice Details (Required) -->
+                <div class="dropzone-box mt-3" [class.has-file]="invoiceFile()">
+                  <div class="dropzone-header">
+                    <div class="dropzone-title">
+                      <span class="badge bg-danger-subtle text-danger border border-danger-subtle me-1">Required</span>
+                      <span class="meesho-file-icon">📄</span>
+                      <strong>tax_invoice_details</strong>
+                      <span class="file-ext-hint">.xlsx or .csv</span>
                     </div>
-                    <button type="button" class="btn-remove-file" (click)="returnFile.set(null)">
-                      <app-icon name="x" [size]="14"></app-icon>
-                    </button>
+                    <small class="text-muted">Tax invoice document series report — file must be named exactly <strong>tax_invoice_details</strong></small>
                   </div>
-                } @else {
-                  <label class="file-picker-label">
-                    <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event, 'return')" />
-                    <app-icon name="cloud-upload" [size]="22" class="text-secondary"></app-icon>
-                    <span>Choose file named <strong>tcs_sales_return</strong> (.xlsx or .csv)</span>
-                  </label>
-                }
-              </div>
 
-              <!-- File 3: Tax Invoice Details (Required) -->
-              <div class="dropzone-box mt-3" [class.has-file]="invoiceFile()">
-                <div class="dropzone-header">
-                  <div class="dropzone-title">
-                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle me-1">Required</span>
-                    <span class="meesho-file-icon">📄</span>
-                    <strong>tax_invoice_details</strong>
-                    <span class="file-ext-hint">.xlsx or .csv</span>
-                  </div>
-                  <small class="text-muted">Tax invoice document series report — file must be named exactly <strong>tax_invoice_details</strong></small>
+                  @if (invoiceFile(); as file) {
+                    <div class="selected-file-pill">
+                      <div class="d-flex align-items-center gap-2">
+                        <app-icon name="csv" [size]="20" class="text-info"></app-icon>
+                        <span class="file-name">{{ file.name }}</span>
+                        <span class="file-size text-muted">({{ formatBytes(file.size) }})</span>
+                        @if (isMeeshoFileName(file.name, 'invoice')) {
+                          <app-icon name="check-circle" [size]="16" class="text-success" title="Correct Meesho file name"></app-icon>
+                        }
+                      </div>
+                      <button type="button" class="btn-remove-file" (click)="invoiceFile.set(null)">
+                        <app-icon name="x" [size]="14"></app-icon>
+                      </button>
+                    </div>
+                  } @else {
+                    <label class="file-picker-label">
+                      <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event, 'invoice')" />
+                      <app-icon name="cloud-upload" [size]="22" class="text-secondary"></app-icon>
+                      <span>Choose file named <strong>tax_invoice_details</strong> (.xlsx or .csv)</span>
+                    </label>
+                  }
                 </div>
-
-                @if (invoiceFile(); as file) {
-                  <div class="selected-file-pill">
-                    <div class="d-flex align-items-center gap-2">
-                      <app-icon name="csv" [size]="20" class="text-info"></app-icon>
-                      <span class="file-name">{{ file.name }}</span>
-                      <span class="file-size text-muted">({{ formatBytes(file.size) }})</span>
-                      @if (isMeeshoFileName(file.name, 'invoice')) {
-                        <app-icon name="check-circle" [size]="16" class="text-success" title="Correct Meesho file name"></app-icon>
-                      }
-                    </div>
-                    <button type="button" class="btn-remove-file" (click)="invoiceFile.set(null)">
-                      <app-icon name="x" [size]="14"></app-icon>
-                    </button>
-                  </div>
-                } @else {
-                  <label class="file-picker-label">
-                    <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event, 'invoice')" />
-                    <app-icon name="cloud-upload" [size]="22" class="text-secondary"></app-icon>
-                    <span>Choose file named <strong>tax_invoice_details</strong> (.xlsx or .csv)</span>
-                  </label>
-                }
-              </div>
+              }
             </div>
 
             @if (isSubmitting()) {
@@ -166,7 +204,7 @@
               type="button"
               class="btn btn-primary-navy d-flex align-items-center gap-2"
               (click)="submitConversion()"
-              [disabled]="!salesFile() || !returnFile() || !invoiceFile() || isSubmitting()"
+              [disabled]="(isAmazonPlatform() ? !amazonMtrFile() : !salesFile() || !returnFile() || !invoiceFile()) || isSubmitting()"
             >
               @if (isSubmitting()) {
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
