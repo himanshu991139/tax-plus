@@ -26,7 +26,7 @@ import { AuthService } from './core/services/auth.service';
   styleUrl: './app.scss',
 })
 export class App {
-  title = 'EcomSalesToGST';
+  title = 'My Ecom GST';
   readonly auth = inject(AuthService);
 }
 
