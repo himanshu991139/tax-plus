@@ -8,7 +8,7 @@
  *
  * Default here is same-origin relative URLs: correct when a reverse proxy
  * forwards /api and /oauth2 to the backend. For a separately hosted backend
- * (e.g. https://gstr1generator.web.app with an API on another origin), set
+ * (e.g. https://myecomgst.web.app with an API on another origin), set
  * `apiOrigin` in `public/api-config.json` to that origin.
  */
 export const environment = {
