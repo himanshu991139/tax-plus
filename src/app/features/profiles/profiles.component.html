@@ -35,14 +35,6 @@
             </div>
 
             <div class="meta-item">
-              <div class="meta-icon"><app-icon name="user" [size]="18"></app-icon></div>
-              <div>
-                <div class="meta-lbl">Client</div>
-                <div class="meta-val">{{ active.ownerName }}</div>
-              </div>
-            </div>
-
-            <div class="meta-item">
               <div class="meta-icon"><app-icon name="id-card" [size]="18"></app-icon></div>
               <div>
                 <div class="meta-lbl">GSTIN</div>
@@ -146,7 +138,6 @@
                 <th>CREATED ON</th>
                 <th class="text-center" style="width: 100px;">DEFAULT</th>
                 <th>COMPANY NAME</th>
-                <th>OWNER NAME</th>
                 <th>GSTIN</th>
                 <th class="text-end">ACTIONS</th>
               </tr>
@@ -175,7 +166,6 @@
                     }
                   </td>
                   <td class="fw-bold text-dark">{{ profile.companyName }}</td>
-                  <td class="text-dark">{{ profile.ownerName }}</td>
                   <td class="font-mono text-primary fw-semibold">{{ profile.gstin }}</td>
                   <td class="text-end">
                     <div class="d-inline-flex align-items-center gap-2">
@@ -205,7 +195,7 @@
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="7" class="text-center py-5 text-muted">
+                  <td colspan="6" class="text-center py-5 text-muted">
                     No GST profiles found matching your search.
                   </td>
                 </tr>

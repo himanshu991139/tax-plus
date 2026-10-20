@@ -19,7 +19,6 @@ export class AddProfileModalComponent {
 
   gstin = '';
   companyName = '';
-  ownerName = '';
   gstUsername = '';
   gstPassword = '';
 
@@ -69,8 +68,6 @@ export class AddProfileModalComponent {
     this.hasAttemptedSubmit.set(true);
     const cleanGstin = this.gstin.trim().toUpperCase();
     const cleanCompanyName = this.companyName.trim();
-    const cleanOwnerName = this.ownerName.trim() || cleanCompanyName;
-
     if (!cleanGstin || !cleanCompanyName) {
       this.state.showToast('Company Name and GSTIN are required.', 'error');
       return;
@@ -81,8 +78,8 @@ export class AddProfileModalComponent {
       return;
     }
 
-    if (cleanCompanyName.length > 100 || cleanOwnerName.length > 100) {
-      this.state.showToast('Company Name and Owner Name must be at most 100 characters.', 'warning');
+    if (cleanCompanyName.length > 100) {
+      this.state.showToast('Company Name must be at most 100 characters.', 'warning');
       return;
     }
 
@@ -90,7 +87,6 @@ export class AddProfileModalComponent {
 
     this.gstApi.createCompany({
       companyName: cleanCompanyName,
-      ownerName: cleanOwnerName,
       gstin: cleanGstin,
     }).subscribe({
       next: (created) => {
@@ -110,7 +106,6 @@ export class AddProfileModalComponent {
   private resetForm(): void {
     this.gstin = '';
     this.companyName = '';
-    this.ownerName = '';
     this.gstUsername = '';
     this.gstPassword = '';
     this.hasAttemptedSubmit.set(false);

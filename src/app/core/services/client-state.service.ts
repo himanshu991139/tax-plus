@@ -108,13 +108,12 @@ export class ClientStateService {
               sNo: index + 1,
               createdOn,
               companyName: c.companyName,
-              ownerName: c.ownerName,
               gstin: c.gstin,
               sellerStateCode: code,
               isDefault: isDef,
               gstr1Status: 'No',
               gstr3bStatus: 'No',
-              username: c.ownerName,
+              username: c.companyName,
               period: prev?.period || 'September 2026',
               periodCode: prev?.periodCode || '092026',
               year: prev?.year || '2026',
@@ -135,8 +134,7 @@ export class ClientStateService {
             current &&
             (matching.gstin !== current.gstin ||
             matching.companyName !== current.companyName ||
-            matching.ownerName !== current.ownerName ||
-            matching.isDefault !== current.isDefault)
+matching.isDefault !== current.isDefault)
           ) {
             this.setActiveProfile({
               ...matching,
@@ -179,8 +177,7 @@ export class ClientStateService {
       const matchSearch =
         !query ||
         p.companyName.toLowerCase().includes(query) ||
-        p.ownerName.toLowerCase().includes(query) ||
-        p.gstin.toLowerCase().includes(query);
+p.gstin.toLowerCase().includes(query);
 
       const matchGstr1 = gstr1 === 'All' || p.gstr1Status === gstr1;
       const matchGstr3b = gstr3b === 'All' || p.gstr3bStatus === gstr3b;
@@ -291,7 +288,7 @@ export class ClientStateService {
     this.activeProfile.set(profile);
     this.clientInfo.set({
       company: profile.companyName,
-      client: profile.ownerName,
+      client: profile.companyName,
       gstin: profile.gstin,
       period: profile.period,
       periodCode: profile.periodCode,

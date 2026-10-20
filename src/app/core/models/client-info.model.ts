@@ -16,7 +16,6 @@ export interface ClientInfo {
 export interface CompanyEntity {
   id: number;
   companyName: string;
-  ownerName: string;
   gstin: string;
   isDefault?: boolean;
   default?: boolean;
@@ -25,7 +24,6 @@ export interface CompanyEntity {
 
 export interface CompanyDto {
   companyName: string;
-  ownerName: string;
   gstin: string;
 }
 
@@ -34,7 +32,6 @@ export interface GstProfile {
   sNo: number;
   createdOn: string;
   companyName: string;
-  ownerName: string;
   gstin: string;
   sellerStateCode: string;
   isDefault?: boolean;
