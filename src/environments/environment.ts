@@ -8,7 +8,7 @@
 export const environment = {
   production: false,
   /** Backend origin for browser redirects outside the /api proxy (OAuth login). */
-  apiOrigin: 'http://localhost:8081',
+  apiOrigin: 'http://localhost:8080',
   /** Default GSTR-1 conversion endpoint shown in System Configuration. */
-  gstConvertEndpoint: 'http://localhost:8081/api/v1/gst/convert-meesho',
+  gstConvertEndpoint: 'http://localhost:8080/api/v1/gst/convert-meesho',
 };

@@ -59,6 +59,12 @@ export function apiUrl(path: string): string {
  * defaults stay in effect so the app still boots.
  */
 export async function loadAppConfig(): Promise<void> {
+  // In development mode (environment.production === false), always use environment.ts
+  // so local dev server requests route to localhost (or via dev-server proxy).
+  if (!environment.production) {
+    return;
+  }
+
   try {
     const response = await fetch('/api-config.json', { cache: 'no-cache' });
     if (!response.ok) return;
