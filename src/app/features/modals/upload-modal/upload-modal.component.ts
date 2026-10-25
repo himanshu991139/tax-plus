@@ -1,11 +1,13 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ClientStateService } from '../../../core/services/client-state.service';
 import { GstApiService } from '../../../core/services/gst-api.service';
+import { getQuarterMonths, QuarterMonthInfo } from '../../../core/models/client-info.model';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
+import { PlatformLogoComponent } from '../../../shared/components/platform-logo/platform-logo.component';
 
 @Component({
   selector: 'app-upload-modal',
@@ -16,6 +18,7 @@ import { IconComponent } from '../../../shared/components/icon/icon.component';
     MatProgressBarModule,
     MatTooltipModule,
     IconComponent,
+    PlatformLogoComponent,
   ],
   templateUrl: './upload-modal.component.html',
   styleUrl: './upload-modal.component.scss',
@@ -34,6 +37,54 @@ export class UploadModalComponent {
   readonly isSubmitting = signal<boolean>(false);
   readonly errorMessage = signal<string | null>(null);
 
+  // Quarterly filing support: 3 months of the active quarter
+  readonly isQuarterly = computed(() => this.state.clientInfo().filingType === 'Quarterly');
+
+  readonly quarterMonths = computed<QuarterMonthInfo[]>(() => {
+    const c = this.state.clientInfo();
+    return getQuarterMonths(c.quarter || 'Q2', c.financialYear || '2026-2027');
+  });
+
+  readonly selectedQuarterMonth = signal<QuarterMonthInfo | null>(null);
+
+  constructor() {
+    effect(() => {
+      const months = this.quarterMonths();
+      const current = this.selectedQuarterMonth();
+      if (!current || !months.some((m) => m.periodCode === current.periodCode)) {
+        this.selectedQuarterMonth.set(months[0] || null);
+      }
+    });
+  }
+
+  selectMonthTab(m: QuarterMonthInfo): void {
+    if (this.selectedQuarterMonth()?.periodCode === m.periodCode) return;
+    this.selectedQuarterMonth.set(m);
+    this.resetFiles();
+  }
+
+  isMonthUploaded(periodCode: string): boolean {
+    const platformId = this.state.selectedPlatform()?.id || '';
+    return this.state.isQuarterMonthUploaded(platformId, periodCode);
+  }
+
+  uploadedMonthsCount(): number {
+    const platformId = this.state.selectedPlatform()?.id || '';
+    return this.quarterMonths().filter((m) => this.state.isQuarterMonthUploaded(platformId, m.periodCode)).length;
+  }
+
+  currentActiveMonth(): QuarterMonthInfo {
+    return this.selectedQuarterMonth() || this.quarterMonths()[0];
+  }
+
+  effectivePeriodCode(): string {
+    if (this.isQuarterly()) {
+      return this.currentActiveMonth().periodCode;
+    }
+    const code = this.state.clientInfo().periodCode;
+    return code && /^\d{6}$/.test(code) ? code : '092026';
+  }
+
   /**
    * Whether the currently selected platform is Amazon.
    */
@@ -47,8 +98,6 @@ export class UploadModalComponent {
 
   /**
    * Allowed extensions for report files.
-   * File-name validation (exact base name matching) has been removed —
-   * any file with a supported extension is accepted for both Amazon and Meesho.
    */
   private static readonly ALLOWED_EXTENSIONS = ['.csv', '.xlsx', '.xls'];
   private static readonly MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
@@ -112,8 +161,10 @@ export class UploadModalComponent {
 
     const client = this.state.clientInfo();
     const gstin = client.gstin || '';
-    const period = client.periodCode || '092026';
+    const period = this.effectivePeriodCode();
     const sellerStateCode = client.sellerStateCode || (gstin.length >= 2 ? gstin.substring(0, 2) : '09');
+    const isQ = this.isQuarterly();
+    const platformId = this.state.selectedPlatform()?.id || 'meesho-b2c';
 
     const formData = new FormData();
     formData.append('tcs_sales', sales);
@@ -122,14 +173,28 @@ export class UploadModalComponent {
     formData.append('gstin', gstin);
     formData.append('period', period);
     formData.append('sellerStateCode', sellerStateCode);
+    if (isQ && client.quarter) {
+      formData.append('quarter', client.quarter);
+    }
 
-    this.gstApi.convertMeesho(formData).subscribe({
+    const request$ = isQ
+      ? this.gstApi.convertMeeshoQuarterly(formData)
+      : this.gstApi.convertMeesho(formData);
+
+    request$.subscribe({
       next: (payload) => {
         this.isSubmitting.set(false);
-        this.state.setGstr1Payload(payload);
-        this.state.showToast('Meesho reports submitted successfully! View Statement and Generate & Download GSTR-1 are now available.', 'success');
-        this.state.closeUploadModal();
-        this.resetFiles();
+        if (isQ) {
+          this.state.setQuarterMonthPayload(platformId, period, payload);
+          const monthName = this.currentActiveMonth().monthName;
+          this.state.showToast(`${monthName} reports uploaded and consolidated into Quarterly return!`, 'success');
+          this.resetFiles();
+        } else {
+          this.state.setGstr1Payload(payload);
+          this.state.showToast('Meesho reports submitted successfully! View Statement and Generate & Download GSTR-1 are now available.', 'success');
+          this.state.closeUploadModal();
+          this.resetFiles();
+        }
       },
       error: (err) => {
         this.isSubmitting.set(false);
@@ -151,22 +216,38 @@ export class UploadModalComponent {
 
     const client = this.state.clientInfo();
     const gstin = client.gstin || '';
-    const period = client.periodCode || '092026';
+    const period = this.effectivePeriodCode();
     const sellerStateCode = client.sellerStateCode || (gstin.length >= 2 ? gstin.substring(0, 2) : '09');
+    const isQ = this.isQuarterly();
+    const platformId = this.state.selectedPlatform()?.id || 'amazon-b2c';
 
     const formData = new FormData();
     formData.append('mtr_file', mtrFile);
     formData.append('gstin', gstin);
     formData.append('period', period);
     formData.append('sellerStateCode', sellerStateCode);
+    if (isQ && client.quarter) {
+      formData.append('quarter', client.quarter);
+    }
 
-    this.gstApi.convertAmazon(formData).subscribe({
+    const request$ = isQ
+      ? this.gstApi.convertAmazonQuarterly(formData)
+      : this.gstApi.convertAmazon(formData);
+
+    request$.subscribe({
       next: (payload) => {
         this.isSubmitting.set(false);
-        this.state.setGstr1Payload(payload);
-        this.state.showToast('Amazon MTR report submitted successfully! View Statement and Generate & Download GSTR-1 are now available.', 'success');
-        this.state.closeUploadModal();
-        this.resetFiles();
+        if (isQ) {
+          this.state.setQuarterMonthPayload(platformId, period, payload);
+          const monthName = this.currentActiveMonth().monthName;
+          this.state.showToast(`${monthName} Amazon MTR uploaded and consolidated into Quarterly return!`, 'success');
+          this.resetFiles();
+        } else {
+          this.state.setGstr1Payload(payload);
+          this.state.showToast('Amazon MTR report submitted successfully! View Statement and Generate & Download GSTR-1 are now available.', 'success');
+          this.state.closeUploadModal();
+          this.resetFiles();
+        }
       },
       error: (err) => {
         this.isSubmitting.set(false);
@@ -181,6 +262,13 @@ export class UploadModalComponent {
     this.invoiceFile.set(null);
     this.amazonMtrFile.set(null);
     this.errorMessage.set(null);
+  }
+
+  onDoneClick(): void {
+    this.state.closeUploadModal();
+    if (this.state.gstr1Payload()) {
+      this.state.showToast('Quarterly platform reports saved. View Statement and Generate & Download GSTR-1 are available.', 'success');
+    }
   }
 
   formatBytes(bytes: number): string {

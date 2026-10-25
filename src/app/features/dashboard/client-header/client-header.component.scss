@@ -2,6 +2,43 @@
         margin-bottom: 24px;
       }
 
+      .frequency-indicator-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        display: inline-block;
+
+        &.quarterly {
+          background-color: #f59e0b;
+        }
+
+        &.monthly {
+          background-color: #3b82f6;
+        }
+      }
+
+      .badge-pill-quarterly {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 1px 6px;
+        border-radius: 4px;
+        background-color: #fef3c7;
+        color: #b45309;
+        border: 1px solid #fde68a;
+      }
+
+      .badge-pill-monthly {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 1px 6px;
+        border-radius: 4px;
+        background-color: #f1f5f9;
+        color: #475569;
+        border: 1px solid #e2e8f0;
+      }
+
       .back-link {
         display: inline-flex;
         align-items: center;

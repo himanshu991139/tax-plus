@@ -34,36 +34,109 @@
                 </div>
               </div>
 
-              <!-- Month and Year Selection -->
-              <div class="filing-period-selection border-top pt-3">
-                <h5 class="fs-6 fw-bold text-dark mb-3">Please provide Month and Year of Filing</h5>
+              <!-- Filing Frequency Selection: Monthly vs Quarterly -->
+              <div class="filing-frequency-selection border-top pt-3 mb-3">
+                <label class="form-label small fw-bold text-dark d-flex align-items-center gap-1 mb-2">
+                  <app-icon name="layers" [size]="15" class="text-primary"></app-icon>
+                  <span>Select Filing Frequency :</span>
+                </label>
+                <div class="frequency-toggle-group">
+                  <button
+                    type="button"
+                    class="frequency-toggle-btn"
+                    [class.active]="filingFrequency === 'Monthly'"
+                    (click)="setFrequency('Monthly')"
+                  >
+                    <span class="frequency-radio-dot"></span>
+                    <div class="frequency-label-box">
+                      <span class="frequency-title">Monthly</span>
+                      <span class="frequency-sub">Regular monthly returns</span>
+                    </div>
+                  </button>
 
-                <div class="mb-3">
-                  <label class="form-label small fw-bold text-dark d-flex align-items-center gap-1">
-                    <app-icon name="calendar" [size]="15" class="text-primary"></app-icon>
-                    <span>Month of Filing :</span>
-                  </label>
-                  <select class="form-select" [(ngModel)]="selectedMonth">
-                    <option value="" disabled>Select month</option>
-                    @for (m of months; track m) {
-                      <option [value]="m">{{ m }}</option>
-                    }
-                  </select>
-                </div>
-
-                <div class="mb-3">
-                  <label class="form-label small fw-bold text-dark d-flex align-items-center gap-1">
-                    <app-icon name="calendar" [size]="15" class="text-primary"></app-icon>
-                    <span>Year of Filing :</span>
-                  </label>
-                  <select class="form-select" [(ngModel)]="selectedYear">
-                    <option value="" disabled>Select year</option>
-                    <option value="2026">2026</option>
-                    <option value="2025">2025</option>
-                    <option value="2024">2024</option>
-                  </select>
+                  <button
+                    type="button"
+                    class="frequency-toggle-btn"
+                    [class.active]="filingFrequency === 'Quarterly'"
+                    (click)="setFrequency('Quarterly')"
+                  >
+                    <span class="frequency-radio-dot"></span>
+                    <div class="frequency-label-box">
+                      <span class="frequency-title">Quarterly</span>
+                      <span class="frequency-sub">QRMP Scheme (Quarterly returns)</span>
+                    </div>
+                  </button>
                 </div>
               </div>
+
+              <!-- Month and Year Selection (Monthly) -->
+              @if (filingFrequency === 'Monthly') {
+                <div class="filing-period-selection border-top pt-3">
+                  <h5 class="fs-6 fw-bold text-dark mb-3">Please provide Month and Year of Filing</h5>
+
+                  <div class="mb-3">
+                    <label class="form-label small fw-bold text-dark d-flex align-items-center gap-1">
+                      <app-icon name="calendar" [size]="15" class="text-primary"></app-icon>
+                      <span>Month of Filing :</span>
+                    </label>
+                    <select class="form-select" [(ngModel)]="selectedMonth">
+                      <option value="" disabled>Select month</option>
+                      @for (m of months; track m) {
+                        <option [value]="m">{{ m }}</option>
+                      }
+                    </select>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label small fw-bold text-dark d-flex align-items-center gap-1">
+                      <app-icon name="calendar" [size]="15" class="text-primary"></app-icon>
+                      <span>Year of Filing :</span>
+                    </label>
+                    <select class="form-select" [(ngModel)]="selectedYear">
+                      <option value="" disabled>Select year</option>
+                      @for (y of years; track y) {
+                        <option [value]="y">{{ y }}</option>
+                      }
+                    </select>
+                  </div>
+                </div>
+              } @else {
+                <!-- Quarter and Financial Year Selection (Quarterly) -->
+                <div class="filing-period-selection border-top pt-3">
+                  <h5 class="fs-6 fw-bold text-dark mb-3">Please provide Quarter and Financial Year of Filing</h5>
+
+                  <div class="mb-3">
+                    <label class="form-label small fw-bold text-dark d-flex align-items-center gap-1">
+                      <app-icon name="calendar" [size]="15" class="text-primary"></app-icon>
+                      <span>Quarter of Filing :</span>
+                    </label>
+                    <select class="form-select" [(ngModel)]="selectedQuarter">
+                      <option value="" disabled>Select quarter</option>
+                      @for (q of quarters; track q.value) {
+                        <option [value]="q.value">{{ q.label }}</option>
+                      }
+                    </select>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label small fw-bold text-dark d-flex align-items-center gap-1">
+                      <app-icon name="calendar" [size]="15" class="text-primary"></app-icon>
+                      <span>Financial Year :</span>
+                    </label>
+                    <select class="form-select" [(ngModel)]="selectedFinancialYear">
+                      <option value="" disabled>Select financial year</option>
+                      @for (fy of financialYears; track fy) {
+                        <option [value]="fy">{{ fy }}</option>
+                      }
+                    </select>
+                  </div>
+
+                  <div class="quarterly-info-note">
+                    <app-icon name="info" [size]="14" class="text-primary mt-1 flex-shrink-0"></app-icon>
+                    <span class="small text-muted"><strong>QRMP Scheme:</strong> Sales and return orders across all 3 months of the quarter will be consolidated into GSTR-1.</span>
+                  </div>
+                </div>
+              }
             }
           </div>
 
@@ -80,7 +153,7 @@
               type="button"
               class="btn btn-brand-amber px-4"
               (click)="confirmImport()"
-              [disabled]="!selectedMonth || !selectedYear"
+              [disabled]="!isSelectionValid()"
             >
               Import Data
             </button>

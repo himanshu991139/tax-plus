@@ -5,6 +5,7 @@ import { ClientHeaderComponent } from '../client-header/client-header.component'
 import { PlatformGridComponent } from '../platform-grid/platform-grid.component';
 import { UploadModalComponent } from '../../modals/upload-modal/upload-modal.component';
 import { StatementModalComponent } from '../../modals/statement-modal/statement-modal.component';
+import { IconComponent } from '../../../shared/components/icon/icon.component';
 import { ClientStateService } from '../../../core/services/client-state.service';
 
 @Component({
@@ -16,6 +17,7 @@ import { ClientStateService } from '../../../core/services/client-state.service'
     PlatformGridComponent,
     UploadModalComponent,
     StatementModalComponent,
+    IconComponent,
   ],
   templateUrl: './dashboard-import.component.html',
   styleUrl: './dashboard-import.component.scss',

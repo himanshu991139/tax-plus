@@ -99,11 +99,35 @@ export class GstApiService {
   }
 
   /**
+   * Converts Meesho reports for Quarterly returns (QRMP scheme) via separate endpoint
+   */
+  convertMeeshoQuarterly(formData: FormData): Observable<Gstr1Payload> {
+    const meeshoQuarterlyUrl = apiUrl('/api/v1/gst/convert-meesho-quarterly');
+    return this.postConvertForm(meeshoQuarterlyUrl, formData);
+  }
+
+  /**
    * Converts Amazon MTR (Merchant Tax Report) B2C data into GSTR-1 JSON.
    */
   convertAmazon(formData: FormData): Observable<Gstr1Payload> {
     const amazonUrl = apiUrl('/api/v1/gst/convert-amazon');
     return this.postConvertForm(amazonUrl, formData);
+  }
+
+  /**
+   * Converts Amazon MTR data for Quarterly returns (QRMP scheme) via separate endpoint
+   */
+  convertAmazonQuarterly(formData: FormData): Observable<Gstr1Payload> {
+    const amazonQuarterlyUrl = apiUrl('/api/v1/gst/convert-amazon-quarterly');
+    return this.postConvertForm(amazonQuarterlyUrl, formData);
+  }
+
+  /**
+   * Converts Combined Meesho & Amazon reports for Quarterly returns
+   */
+  convertCombinedQuarterly(formData: FormData): Observable<Gstr1Payload> {
+    const combinedQuarterlyUrl = apiUrl('/api/v1/gst/convert-combined-quarterly');
+    return this.postConvertForm(combinedQuarterlyUrl, formData);
   }
 
   /**
@@ -224,6 +248,22 @@ export class GstApiService {
             }
           : undefined,
     };
+  }
+
+  /**
+   * Combines multiple monthly GSTR-1 payloads (e.g., across 3 months of a quarter) into one unified return.
+   */
+  combineMultiplePayloads(payloads: Gstr1Payload[], targetFp?: string): Gstr1Payload | null {
+    const valid = (payloads || []).filter((p) => p && (p.b2cs || p.hsn || p.supeco || p.doc_issue));
+    if (valid.length === 0) return null;
+    let res = valid[0];
+    for (let i = 1; i < valid.length; i++) {
+      res = this.combinePayloadsLocally(res, valid[i]);
+    }
+    if (targetFp) {
+      res = { ...res, fp: targetFp };
+    }
+    return res;
   }
 
   /**

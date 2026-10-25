@@ -1,29 +1,29 @@
     @if (state.isUploadModalOpen()) {
       <div class="modal-overlay">
         <div class="modal-dialog-custom" (click)="$event.stopPropagation()">
-          <!-- Modal Header -->
+          <!-- Modal Header (Inspired by GSTProSeller) -->
           <div class="modal-header-custom">
-            <div class="header-left-col">
-              <div class="modal-brand-badge">
-                <div class="modal-logo-mark">
-                  <svg viewBox="0 0 24 24" class="logo-svg" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="url(#modalLogoGrad)" />
-                    <defs>
-                      <linearGradient id="modalLogoGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
-                        <stop stop-color="#38bdf8" />
-                        <stop offset="1" stop-color="#818cf8" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </div>
-                <div>
-                  <h2 class="modal-title">
-                    Import {{ state.selectedPlatform()?.name || 'Platform' }} Data
-                  </h2>
-                  <div class="modal-subtitle">
-                    Filing Period: <strong>{{ state.clientInfo().period }}</strong> | GSTIN:
-                    <span class="font-mono">{{ state.clientInfo().gstin }}</span>
-                  </div>
+            <div class="d-flex align-items-center gap-3">
+              <div class="modal-platform-logo-box">
+                <app-platform-logo [platform]="state.selectedPlatform()?.logoType || 'meesho'"></app-platform-logo>
+              </div>
+              <div>
+                <h2 class="modal-platform-title m-0">
+                  {{ state.selectedPlatform()?.name || 'Meesho' }}
+                </h2>
+                <div class="modal-platform-sub d-flex align-items-center gap-2">
+                  <span class="platform-domain">
+                    <app-icon name="globe" [size]="12"></app-icon>
+                    <span>{{ isAmazonPlatform() ? 'amazon.in' : 'meesho.com' }}</span>
+                  </span>
+                  <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-0">
+                    {{ state.selectedPlatform()?.badge || 'B2C' }}
+                  </span>
+                  @if (isQuarterly()) {
+                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2 py-0">
+                      Quarterly (QRMP)
+                    </span>
+                  }
                 </div>
               </div>
             </div>
@@ -36,186 +36,241 @@
           <!-- Modal Body -->
           <div class="modal-body-custom">
             @if (errorMessage()) {
-              <div class="alert alert-danger d-flex align-items-center gap-2 mb-3" role="alert">
-                <app-icon name="alert" [size]="18"></app-icon>
-                <div class="flex-grow-1">{{ errorMessage() }}</div>
+              <div class="alert alert-danger d-flex align-items-center gap-2 mb-3 py-2 px-3 rounded-2" role="alert">
+                <app-icon name="alert" [size]="18" class="flex-shrink-0"></app-icon>
+                <div class="flex-grow-1 small">{{ errorMessage() }}</div>
                 <button type="button" class="btn-close" (click)="errorMessage.set(null)"></button>
               </div>
             }
 
+            <!-- 1. Quarter Month Selection Tabs (Shown in Quarterly Mode) -->
+            @if (isQuarterly()) {
+              <div class="quarter-month-tabs-container mb-3">
+                <div class="quarter-month-tabs-nav">
+                  @for (m of quarterMonths(); track m.periodCode) {
+                    <button
+                      type="button"
+                      class="month-tab-btn"
+                      [class.active]="currentActiveMonth().periodCode === m.periodCode"
+                      [class.uploaded]="isMonthUploaded(m.periodCode)"
+                      (click)="selectMonthTab(m)"
+                    >
+                      <span>{{ m.monthName }}</span>
+                      @if (isMonthUploaded(m.periodCode)) {
+                        <span class="tab-check-pill" title="Uploaded &amp; processed">
+                          <app-icon name="check" [size]="11"></app-icon>
+                        </span>
+                      }
+                    </button>
+                  }
+                </div>
+              </div>
+            }
 
-            <!-- Upload File Inputs -->
-            <div class="file-dropzone-group">
-              @if (isAmazonPlatform()) {
-                <!-- Amazon: Single MTR file -->
-                <div class="dropzone-box" [class.has-file]="amazonMtrFile()">
-                  <div class="dropzone-header">
-                    <div class="dropzone-title">
+            <!-- 2. Download Path Box -->
+            <div class="download-path-box mb-3">
+              <div class="box-label">Download Path</div>
+              <div class="box-content">
+                @if (isAmazonPlatform()) {
+                  <span>Amazon Seller Central -&gt; Reports -&gt; Tax Document Library -&gt; Merchant Tax Report (MTR)</span>
+                } @else {
+                  <span>Meesho Panel -&gt; Payments -&gt; Download GST Reports</span>
+                }
+              </div>
+            </div>
+
+            <!-- 3. GSTIN Box -->
+            <div class="gstin-row mb-3">
+              <div class="box-label mb-1">
+                GSTIN Of {{ isAmazonPlatform() ? 'Amazon' : 'Meesho' }} / Seller
+              </div>
+              <div class="input-group">
+                <span class="input-group-text fw-bold bg-light text-secondary border">GSTIN</span>
+                <input
+                  type="text"
+                  class="form-control font-mono fw-semibold bg-white"
+                  [value]="state.clientInfo().gstin"
+                  readonly
+                />
+              </div>
+            </div>
+
+            <!-- 4. Upload Files Section -->
+            <div class="upload-files-section">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="box-label m-0">Upload Files</div>
+                @if (isQuarterly()) {
+                  <span class="badge bg-light text-secondary border">
+                    For {{ currentActiveMonth().monthName }} {{ currentActiveMonth().year }}
+                  </span>
+                }
+              </div>
+
+              <div class="files-list-card">
+                @if (isAmazonPlatform()) {
+                  <!-- Amazon: Single MTR file -->
+                  <div class="file-row-item">
+                    <span class="file-row-name">
                       <span class="badge bg-danger-subtle text-danger border border-danger-subtle me-1">Required</span>
-                      <span class="amazon-file-icon">📦</span>
-                      <strong>MTR</strong>
-                      <span class="file-ext-hint">.xlsx, .xls or .csv</span>
-                    </div>
-                    <small class="text-muted">Amazon Merchant Tax Report (MTR) B2C — .xlsx, .xls or .csv</small>
-                  </div>
-
-                  @if (amazonMtrFile(); as file) {
-                    <div class="selected-file-pill">
-                      <div class="d-flex align-items-center gap-2">
-                        <app-icon name="excel" [size]="20" class="text-success"></app-icon>
-                        <span class="file-name">{{ file.name }}</span>
-                        <span class="file-size text-muted">({{ formatBytes(file.size) }})</span>
-                        <app-icon name="check-circle" [size]="16" class="text-success" title="File accepted"></app-icon>
-                      </div>
-                      <button type="button" class="btn-remove-file" (click)="amazonMtrFile.set(null)">
-                        <app-icon name="x" [size]="14"></app-icon>
-                      </button>
-                    </div>
-                  } @else {
-                    <label class="file-picker-label">
+                      <strong>mtr_file.xlsx / .csv</strong>
+                    </span>
+                    <label class="btn-choose-file">
                       <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event, 'amazonMtr')" />
-                      <app-icon name="cloud-upload" [size]="22" class="text-primary"></app-icon>
-                      <span>Choose Amazon MTR file (.xlsx, .xls or .csv)</span>
+                      <span>Choose file</span>
                     </label>
-                  }
-                </div>
-              } @else {
-                <!-- Meesho: 3 files -->
-                <!-- File 1: TCS Sales (Required) -->
-                <div class="dropzone-box" [class.has-file]="salesFile()">
-                  <div class="dropzone-header">
-                    <div class="dropzone-title">
-                      <span class="badge bg-danger-subtle text-danger border border-danger-subtle me-1">Required</span>
-                      <span class="meesho-file-icon">📊</span>
-                      <strong>tcs_sales</strong>
-                      <span class="file-ext-hint">.xlsx, .xls or .csv</span>
-                    </div>
-                    <small class="text-muted">Meesho forward orders &amp; TCS report — .xlsx, .xls or .csv</small>
+                    <span class="file-row-status" [class.has-file]="amazonMtrFile()">
+                      @if (amazonMtrFile(); as f) {
+                        <span class="text-success d-inline-flex align-items-center gap-1">
+                          <app-icon name="check-circle" [size]="14"></app-icon>
+                          <span class="file-name-text">{{ f.name }} ({{ formatBytes(f.size) }})</span>
+                        </span>
+                      } @else {
+                        <span class="text-muted">No file chosen</span>
+                      }
+                    </span>
                   </div>
-
-                  @if (salesFile(); as file) {
-                    <div class="selected-file-pill">
-                      <div class="d-flex align-items-center gap-2">
-                        <app-icon name="excel" [size]="20" class="text-success"></app-icon>
-                        <span class="file-name">{{ file.name }}</span>
-                        <span class="file-size text-muted">({{ formatBytes(file.size) }})</span>
-                        <app-icon name="check-circle" [size]="16" class="text-success" title="File accepted"></app-icon>
-                      </div>
-                      <button type="button" class="btn-remove-file" (click)="salesFile.set(null)">
-                        <app-icon name="x" [size]="14"></app-icon>
-                      </button>
-                    </div>
-                  } @else {
-                    <label class="file-picker-label">
+                } @else {
+                  <!-- Meesho: 3 files -->
+                  <!-- File 1: TCS Sales -->
+                  <div class="file-row-item">
+                    <span class="file-row-name">
+                      <span class="badge bg-danger-subtle text-danger border border-danger-subtle me-1">Required</span>
+                      <strong>tcs_sales.xlsx</strong>
+                    </span>
+                    <label class="btn-choose-file">
                       <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event, 'sales')" />
-                      <app-icon name="cloud-upload" [size]="22" class="text-primary"></app-icon>
-                      <span>Choose file (.xlsx, .xls or .csv)</span>
+                      <span>Choose file</span>
                     </label>
-                  }
-                </div>
-
-                <!-- File 2: TCS Sales Return (Required) -->
-                <div class="dropzone-box mt-3" [class.has-file]="returnFile()">
-                  <div class="dropzone-header">
-                    <div class="dropzone-title">
-                      <span class="badge bg-danger-subtle text-danger border border-danger-subtle me-1">Required</span>
-                      <span class="meesho-file-icon">↩️</span>
-                      <strong>tcs_sales_return</strong>
-                      <span class="file-ext-hint">.xlsx, .xls or .csv</span>
-                    </div>
-                    <small class="text-muted">Customer returns &amp; RTOs report — .xlsx, .xls or .csv</small>
+                    <span class="file-row-status" [class.has-file]="salesFile()">
+                      @if (salesFile(); as f) {
+                        <span class="text-success d-inline-flex align-items-center gap-1">
+                          <app-icon name="check-circle" [size]="14"></app-icon>
+                          <span class="file-name-text">{{ f.name }} ({{ formatBytes(f.size) }})</span>
+                        </span>
+                      } @else {
+                        <span class="text-muted">No file chosen</span>
+                      }
+                    </span>
                   </div>
 
-                  @if (returnFile(); as file) {
-                    <div class="selected-file-pill">
-                      <div class="d-flex align-items-center gap-2">
-                        <app-icon name="excel" [size]="20" class="text-warning"></app-icon>
-                        <span class="file-name">{{ file.name }}</span>
-                        <span class="file-size text-muted">({{ formatBytes(file.size) }})</span>
-                        <app-icon name="check-circle" [size]="16" class="text-success" title="File accepted"></app-icon>
-                      </div>
-                      <button type="button" class="btn-remove-file" (click)="returnFile.set(null)">
-                        <app-icon name="x" [size]="14"></app-icon>
-                      </button>
-                    </div>
-                  } @else {
-                    <label class="file-picker-label">
+                  <!-- File 2: TCS Sales Return -->
+                  <div class="file-row-item">
+                    <span class="file-row-name">
+                      <span class="badge bg-danger-subtle text-danger border border-danger-subtle me-1">Required</span>
+                      <strong>tcs_sales_return.xlsx</strong>
+                    </span>
+                    <label class="btn-choose-file">
                       <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event, 'return')" />
-                      <app-icon name="cloud-upload" [size]="22" class="text-secondary"></app-icon>
-                      <span>Choose file (.xlsx, .xls or .csv)</span>
+                      <span>Choose file</span>
                     </label>
-                  }
-                </div>
-
-                <!-- File 3: Tax Invoice Details (Required) -->
-                <div class="dropzone-box mt-3" [class.has-file]="invoiceFile()">
-                  <div class="dropzone-header">
-                    <div class="dropzone-title">
-                      <span class="badge bg-danger-subtle text-danger border border-danger-subtle me-1">Required</span>
-                      <span class="meesho-file-icon">📄</span>
-                      <strong>tax_invoice_details</strong>
-                      <span class="file-ext-hint">.xlsx, .xls or .csv</span>
-                    </div>
-                    <small class="text-muted">Tax invoice document series report — .xlsx, .xls or .csv</small>
+                    <span class="file-row-status" [class.has-file]="returnFile()">
+                      @if (returnFile(); as f) {
+                        <span class="text-success d-inline-flex align-items-center gap-1">
+                          <app-icon name="check-circle" [size]="14"></app-icon>
+                          <span class="file-name-text">{{ f.name }} ({{ formatBytes(f.size) }})</span>
+                        </span>
+                      } @else {
+                        <span class="text-muted">No file chosen</span>
+                      }
+                    </span>
                   </div>
 
-                  @if (invoiceFile(); as file) {
-                    <div class="selected-file-pill">
-                      <div class="d-flex align-items-center gap-2">
-                        <app-icon name="csv" [size]="20" class="text-info"></app-icon>
-                        <span class="file-name">{{ file.name }}</span>
-                        <span class="file-size text-muted">({{ formatBytes(file.size) }})</span>
-                        <app-icon name="check-circle" [size]="16" class="text-success" title="File accepted"></app-icon>
-                      </div>
-                      <button type="button" class="btn-remove-file" (click)="invoiceFile.set(null)">
-                        <app-icon name="x" [size]="14"></app-icon>
-                      </button>
-                    </div>
-                  } @else {
-                    <label class="file-picker-label">
+                  <!-- File 3: Tax Invoice Details -->
+                  <div class="file-row-item">
+                    <span class="file-row-name">
+                      <span class="badge bg-danger-subtle text-danger border border-danger-subtle me-1">Required</span>
+                      <strong>Tax_invoice_details.xlsx</strong>
+                    </span>
+                    <label class="btn-choose-file">
                       <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event, 'invoice')" />
-                      <app-icon name="cloud-upload" [size]="22" class="text-secondary"></app-icon>
-                      <span>Choose file (.xlsx, .xls or .csv)</span>
+                      <span>Choose file</span>
                     </label>
+                    <span class="file-row-status" [class.has-file]="invoiceFile()">
+                      @if (invoiceFile(); as f) {
+                        <span class="text-success d-inline-flex align-items-center gap-1">
+                          <app-icon name="check-circle" [size]="14"></app-icon>
+                          <span class="file-name-text">{{ f.name }} ({{ formatBytes(f.size) }})</span>
+                        </span>
+                      } @else {
+                        <span class="text-muted">No file chosen</span>
+                      }
+                    </span>
+                  </div>
+                }
+              </div>
+
+              <!-- Upload / Reset Action Buttons -->
+              <div class="d-flex align-items-center gap-2 mt-3">
+                <button
+                  type="button"
+                  class="btn btn-emerald-action d-flex align-items-center gap-2"
+                  (click)="submitConversion()"
+                  [disabled]="(isAmazonPlatform() ? !amazonMtrFile() : !salesFile() || !returnFile() || !invoiceFile()) || isSubmitting()"
+                >
+                  @if (isSubmitting()) {
+                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                    <span>Processing...</span>
+                  } @else {
+                    <app-icon name="cloud-upload" [size]="16"></app-icon>
+                    <span>Upload</span>
                   }
-                </div>
-              }
+                </button>
+
+                <button
+                  type="button"
+                  class="btn btn-rose-reset"
+                  (click)="resetFiles()"
+                  [disabled]="isSubmitting()"
+                >
+                  Reset
+                </button>
+              </div>
             </div>
 
             @if (isSubmitting()) {
               <div class="mt-3">
                 <mat-progress-bar mode="indeterminate"></mat-progress-bar>
                 <div class="text-center mt-2 small text-primary fw-semibold">
-                  Uploading reports and converting to GSTR-1...
+                  Converting reports for {{ isQuarterly() ? currentActiveMonth().monthName : state.clientInfo().period }}...
                 </div>
               </div>
             }
           </div>
 
           <!-- Modal Footer -->
-          <div class="modal-footer-custom">
-            <button
-              type="button"
-              class="btn btn-outline-secondary"
-              (click)="state.closeUploadModal()"
-              [disabled]="isSubmitting()"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary-navy d-flex align-items-center gap-2"
-              (click)="submitConversion()"
-              [disabled]="(isAmazonPlatform() ? !amazonMtrFile() : !salesFile() || !returnFile() || !invoiceFile()) || isSubmitting()"
-            >
-              @if (isSubmitting()) {
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                <span>Submitting...</span>
+          <div class="modal-footer-custom d-flex align-items-center justify-content-between">
+            <div>
+              @if (isQuarterly()) {
+                <span class="small text-muted">
+                  Quarterly Status: <strong>{{ uploadedMonthsCount() }}/3</strong> months uploaded
+                </span>
               } @else {
-                <app-icon name="check" [size]="16"></app-icon>
-                <span>Submit</span>
+                <span class="small text-muted">
+                  Filing Period: <strong>{{ state.clientInfo().period }}</strong>
+                </span>
               }
-            </button>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+              <button
+                type="button"
+                class="btn btn-outline-secondary px-3"
+                (click)="state.closeUploadModal()"
+                [disabled]="isSubmitting()"
+              >
+                Cancel
+              </button>
+              @if (isQuarterly()) {
+                <button
+                  type="button"
+                  class="btn btn-done-navy px-4 d-flex align-items-center gap-2"
+                  (click)="onDoneClick()"
+                >
+                  <app-icon name="check" [size]="16"></app-icon>
+                  <span>Done</span>
+                </button>
+              }
+            </div>
           </div>
         </div>
       </div>

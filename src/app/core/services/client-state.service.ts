@@ -200,8 +200,12 @@ p.gstin.toLowerCase().includes(query);
     const query = this.searchQuery().trim().toLowerCase();
     const typeFilter = this.selectedType();
     const statusFilter = this.selectedStatus().toLowerCase();
+    const currentFrequency = (this.clientInfo().filingType === 'Quarterly' ? 'QUARTERLY' : 'MONTHLY') as 'MONTHLY' | 'QUARTERLY';
 
-    return this.platforms().filter((p) => {
+    return this.platforms().map((p) => ({
+      ...p,
+      filingFrequency: currentFrequency,
+    })).filter((p) => {
       const matchesSearch =
         !query || p.name.toLowerCase().includes(query) || (p.tagline && p.tagline.toLowerCase().includes(query));
       const matchesType = typeFilter === 'All' || p.badge === typeFilter;
@@ -213,6 +217,10 @@ p.gstin.toLowerCase().includes(query);
   // Converted GSTR-1 Data per platform
   readonly meeshoPayload = signal<Gstr1Payload | null>(null);
   readonly amazonPayload = signal<Gstr1Payload | null>(null);
+
+  // Month-by-month payloads for Quarterly filing: platformId -> Map<periodCode, Gstr1Payload>
+  readonly meeshoQuarterMonths = signal<Map<string, Gstr1Payload>>(new Map());
+  readonly amazonQuarterMonths = signal<Map<string, Gstr1Payload>>(new Map());
 
   // Effective GSTR-1 return (Combined if both uploaded, or individual)
   readonly gstr1Payload = computed<Gstr1Payload | null>(() => {
@@ -321,7 +329,11 @@ p.gstin.toLowerCase().includes(query);
       gstin: profile.gstin,
       period: profile.period,
       periodCode: profile.periodCode,
+      filingType: profile.filingType || 'Monthly',
+      quarter: profile.quarter,
+      financialYear: profile.financialYear,
       year: profile.year,
+      type: profile.filingType || 'Monthly',
       sellerStateCode: profile.sellerStateCode,
     });
   }
@@ -370,6 +382,40 @@ p.gstin.toLowerCase().includes(query);
     };
   }
 
+  buildQuarterlyPeriod(quarter: 'Q1' | 'Q2' | 'Q3' | 'Q4', financialYear: string): { period: string; periodCode: string; quarterLabel: string } {
+    let startYear = 2026;
+    if (financialYear) {
+      const match = financialYear.match(/\d{4}/);
+      if (match) {
+        startYear = parseInt(match[0], 10);
+      }
+    }
+    const nextYear = startYear + 1;
+    let periodCode = `09${startYear}`;
+    let quarterLabel = 'Q2 (Jul - Sep)';
+
+    if (quarter === 'Q1') {
+      periodCode = `06${startYear}`;
+      quarterLabel = 'Q1 (Apr - Jun)';
+    } else if (quarter === 'Q2') {
+      periodCode = `09${startYear}`;
+      quarterLabel = 'Q2 (Jul - Sep)';
+    } else if (quarter === 'Q3') {
+      periodCode = `12${startYear}`;
+      quarterLabel = 'Q3 (Oct - Dec)';
+    } else if (quarter === 'Q4') {
+      periodCode = `03${nextYear}`;
+      quarterLabel = 'Q4 (Jan - Mar)';
+    }
+
+    const shortFy = `${startYear}-${String(nextYear).substring(2)}`;
+    return {
+      period: `${quarterLabel} FY ${shortFy}`,
+      periodCode,
+      quarterLabel,
+    };
+  }
+
   combinationKey(gstin: string, periodCode: string): string {
     return `${(gstin || '').trim().toUpperCase()}|${periodCode || ''}`;
   }
@@ -384,25 +430,51 @@ p.gstin.toLowerCase().includes(query);
 
   /**
    * Applies GSTIN + filing-period combination.
-   * Clears converted GSTR-1 only when GSTIN or period actually changes.
+   * Clears converted GSTR-1 only when GSTIN, period or filing type actually changes.
    */
-  applyClientCombination(profile: GstProfile, month: string, year: string): ApplyCombinationResult {
-    const { period, periodCode } = this.buildPeriod(month, year);
+  applyClientCombination(
+    profile: GstProfile,
+    month: string,
+    year: string,
+    filingType: 'Monthly' | 'Quarterly' = 'Monthly',
+    quarter?: 'Q1' | 'Q2' | 'Q3' | 'Q4',
+    financialYear?: string
+  ): ApplyCombinationResult {
+    let period: string;
+    let periodCode: string;
+    let effectiveMonth = month;
+    let effectiveYear = year;
+
+    if (filingType === 'Quarterly') {
+      const qRes = this.buildQuarterlyPeriod(quarter || 'Q2', financialYear || '2026-2027');
+      period = qRes.period;
+      periodCode = qRes.periodCode;
+      effectiveMonth = qRes.quarterLabel;
+      effectiveYear = financialYear || year;
+    } else {
+      const mRes = this.buildPeriod(month, year);
+      period = mRes.period;
+      periodCode = mRes.periodCode;
+    }
+
     const prev = this.clientInfo();
     const sameGstin = (prev.gstin || '').trim().toUpperCase() === (profile.gstin || '').trim().toUpperCase();
-    const samePeriod = prev.periodCode === periodCode;
+    const samePeriod = prev.periodCode === periodCode && prev.filingType === filingType;
     const changed = !sameGstin || !samePeriod;
 
     const updated: GstProfile = {
       ...profile,
-      month,
-      year,
+      month: effectiveMonth,
+      year: effectiveYear,
       period,
       periodCode,
+      filingType,
+      quarter: filingType === 'Quarterly' ? (quarter || 'Q2') : undefined,
+      financialYear: filingType === 'Quarterly' ? (financialYear || '2026-2027') : undefined,
     };
 
     this.profiles.update((list) =>
-      list.map((p) => (p.id === updated.id ? { ...p, month, year, period, periodCode } : p)),
+      list.map((p) => (p.id === updated.id ? { ...p, ...updated } : p)),
     );
     this.setActiveProfile(updated);
 
@@ -424,13 +496,20 @@ p.gstin.toLowerCase().includes(query);
     this.pendingProfile.set(null);
   }
 
-  confirmProfileImport(month: string, year: string): void {
+  confirmProfileImport(
+    month: string,
+    year: string,
+    filingType: 'Monthly' | 'Quarterly' = 'Monthly',
+    quarter?: 'Q1' | 'Q2' | 'Q3' | 'Q4',
+    financialYear?: string
+  ): void {
     const profile = this.pendingProfile() || this.activeProfile();
     if (!profile) return;
 
-    this.applyClientCombination(profile, month, year);
+    this.applyClientCombination(profile, month, year, filingType, quarter, financialYear);
     this.closeClientInfoModal();
-    this.showToast(`Selected ${profile.companyName} for ${month} ${year}.`, 'success');
+    const periodLabel = filingType === 'Quarterly' ? `${quarter || 'Quarter'} (${financialYear || 'FY'})` : `${month} ${year}`;
+    this.showToast(`Selected ${profile.companyName} for ${periodLabel} [${filingType}].`, 'success');
 
     const currentUrl = this.router.url;
     if (!currentUrl.includes('/app/dashboard/import')) {
@@ -502,9 +581,61 @@ p.gstin.toLowerCase().includes(query);
     }
   }
 
+  setQuarterMonthPayload(platformId: string, monthPeriodCode: string, payload: Gstr1Payload): void {
+    if (platformId === 'meesho-b2c') {
+      const nextMap = new Map(this.meeshoQuarterMonths());
+      nextMap.set(monthPeriodCode, payload);
+      this.meeshoQuarterMonths.set(nextMap);
+
+      const allPayloads = Array.from(nextMap.values());
+      const combined = this.gstApi.combineMultiplePayloads(allPayloads, this.clientInfo().periodCode);
+      this.meeshoPayload.set(combined);
+    } else if (platformId === 'amazon-b2c') {
+      const nextMap = new Map(this.amazonQuarterMonths());
+      nextMap.set(monthPeriodCode, payload);
+      this.amazonQuarterMonths.set(nextMap);
+
+      const allPayloads = Array.from(nextMap.values());
+      const combined = this.gstApi.combineMultiplePayloads(allPayloads, this.clientInfo().periodCode);
+      this.amazonPayload.set(combined);
+    }
+  }
+
+  getQuarterMonthPayload(platformId: string, monthPeriodCode: string): Gstr1Payload | undefined {
+    if (platformId === 'meesho-b2c') {
+      return this.meeshoQuarterMonths().get(monthPeriodCode);
+    }
+    if (platformId === 'amazon-b2c') {
+      return this.amazonQuarterMonths().get(monthPeriodCode);
+    }
+    return undefined;
+  }
+
+  isQuarterMonthUploaded(platformId: string, monthPeriodCode: string): boolean {
+    return this.getQuarterMonthPayload(platformId, monthPeriodCode) !== undefined;
+  }
+
+  clearQuarterMonthPayload(platformId: string, monthPeriodCode: string): void {
+    if (platformId === 'meesho-b2c') {
+      const nextMap = new Map(this.meeshoQuarterMonths());
+      nextMap.delete(monthPeriodCode);
+      this.meeshoQuarterMonths.set(nextMap);
+      const allPayloads = Array.from(nextMap.values());
+      this.meeshoPayload.set(this.gstApi.combineMultiplePayloads(allPayloads, this.clientInfo().periodCode));
+    } else if (platformId === 'amazon-b2c') {
+      const nextMap = new Map(this.amazonQuarterMonths());
+      nextMap.delete(monthPeriodCode);
+      this.amazonQuarterMonths.set(nextMap);
+      const allPayloads = Array.from(nextMap.values());
+      this.amazonPayload.set(this.gstApi.combineMultiplePayloads(allPayloads, this.clientInfo().periodCode));
+    }
+  }
+
   clearUploadedData(): void {
     this.meeshoPayload.set(null);
     this.amazonPayload.set(null);
+    this.meeshoQuarterMonths.set(new Map());
+    this.amazonQuarterMonths.set(new Map());
     this.showToast('Uploaded platform reports cleared.', 'info');
   }
 

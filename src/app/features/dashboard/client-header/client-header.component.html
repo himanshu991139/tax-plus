@@ -5,7 +5,20 @@
           <app-icon name="chevron-down" [size]="14" customClass="rotate-left"></app-icon>
           <span>Back to Manage GST Profiles</span>
         </a>
-        <span class="badge bg-light text-secondary border">Filing Dashboard</span>
+        <div class="d-flex align-items-center gap-2">
+          @if (isQuarterly()) {
+            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle d-inline-flex align-items-center gap-1">
+              <span class="frequency-indicator-dot quarterly"></span>
+              <span>Quarterly Return (QRMP)</span>
+            </span>
+          } @else {
+            <span class="badge bg-light text-secondary border d-inline-flex align-items-center gap-1">
+              <span class="frequency-indicator-dot monthly"></span>
+              <span>Monthly Filing</span>
+            </span>
+          }
+          <span class="badge bg-light text-secondary border">Filing Dashboard</span>
+        </div>
       </div>
 
       <div class="page-title-row">
@@ -72,22 +85,46 @@
               <app-icon name="calendar" [size]="18"></app-icon>
             </div>
             <div class="meta-text-col">
-              <div class="meta-label">Filing Period</div>
+              <div class="meta-label d-flex align-items-center gap-1">
+                <span>Filing Period</span>
+                @if (isQuarterly()) {
+                  <span class="badge-pill-quarterly">Quarterly</span>
+                } @else {
+                  <span class="badge-pill-monthly">Monthly</span>
+                }
+              </div>
               <div class="period-selectors">
-                <select
-                  class="period-select"
-                  [ngModel]="selectedMonth()"
-                  disabled
-                >
-                  <option [value]="selectedMonth()">{{ selectedMonth() }}</option>
-                </select>
-                <select
-                  class="period-select year-select"
-                  [ngModel]="selectedYear()"
-                  disabled
-                >
-                  <option [value]="selectedYear()">{{ selectedYear() }}</option>
-                </select>
+                @if (isQuarterly()) {
+                  <select
+                    class="period-select"
+                    [ngModel]="selectedQuarterLabel()"
+                    disabled
+                  >
+                    <option [value]="selectedQuarterLabel()">{{ selectedQuarterLabel() }}</option>
+                  </select>
+                  <select
+                    class="period-select year-select"
+                    [ngModel]="selectedFinancialYear()"
+                    disabled
+                  >
+                    <option [value]="selectedFinancialYear()">{{ selectedFinancialYear() }}</option>
+                  </select>
+                } @else {
+                  <select
+                    class="period-select"
+                    [ngModel]="selectedMonth()"
+                    disabled
+                  >
+                    <option [value]="selectedMonth()">{{ selectedMonth() }}</option>
+                  </select>
+                  <select
+                    class="period-select year-select"
+                    [ngModel]="selectedYear()"
+                    disabled
+                  >
+                    <option [value]="selectedYear()">{{ selectedYear() }}</option>
+                  </select>
+                }
               </div>
             </div>
           </div>
