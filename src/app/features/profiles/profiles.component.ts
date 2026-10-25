@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -23,6 +23,10 @@ export class ProfilesComponent implements OnInit {
   readonly state = inject(ClientStateService);
   private readonly router = inject(Router);
 
+  // ── Delete confirmation dialog state ──────────────────────────
+  readonly deleteDialogVisible = signal(false);
+  readonly profileToDelete = signal<GstProfile | null>(null);
+
   ngOnInit(): void {
     this.state.loadProfilesFromBackend();
   }
@@ -40,10 +44,25 @@ export class ProfilesComponent implements OnInit {
     this.state.openClientInfoModal(profile);
   }
 
+  /** Opens the custom delete confirmation dialog */
   deleteProfile(profile: GstProfile): void {
-    if (confirm(`Are you sure you want to delete profile for "${profile.companyName}"?`)) {
+    this.profileToDelete.set(profile);
+    this.deleteDialogVisible.set(true);
+  }
+
+  /** Called when user confirms deletion inside the dialog */
+  confirmDelete(): void {
+    const profile = this.profileToDelete();
+    if (profile) {
       this.state.deleteProfile(profile.id);
     }
+    this.cancelDelete();
+  }
+
+  /** Dismisses the dialog without deleting */
+  cancelDelete(): void {
+    this.deleteDialogVisible.set(false);
+    this.profileToDelete.set(null);
   }
 
   onAddInBulk(): void {

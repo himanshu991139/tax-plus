@@ -207,4 +207,58 @@
 
       <!-- Modals -->
       <app-add-profile-modal></app-add-profile-modal>
+
+      <!-- ── Custom Delete Confirmation Dialog ───────────────────── -->
+      @if (deleteDialogVisible()) {
+        <div class="delete-overlay" (click)="cancelDelete()">
+          <div class="delete-dialog" (click)="$event.stopPropagation()">
+
+            <!-- Danger icon -->
+            <div class="dd-icon-wrap">
+              <div class="dd-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                  <path d="M10 11v6M14 11v6"/>
+                  <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Text -->
+            <h3 class="dd-title">Delete Profile?</h3>
+            <p class="dd-body">
+              You are about to permanently delete the profile for
+              <strong>"{{ profileToDelete()?.companyName }}"</strong>.
+              This action cannot be undone.
+            </p>
+
+            <!-- GSTIN chip -->
+            @if (profileToDelete()?.gstin) {
+              <div class="dd-gstin-chip">
+                <span class="dd-gstin-label">GSTIN</span>
+                <span class="dd-gstin-val">{{ profileToDelete()?.gstin }}</span>
+              </div>
+            }
+
+            <!-- Actions -->
+            <div class="dd-actions">
+              <button type="button" class="dd-btn-cancel" (click)="cancelDelete()">
+                Cancel
+              </button>
+              <button type="button" class="dd-btn-delete" (click)="confirmDelete()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                </svg>
+                Yes, Delete
+              </button>
+            </div>
+
+          </div>
+        </div>
+      }
+
     </div>
