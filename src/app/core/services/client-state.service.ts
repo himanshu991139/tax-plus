@@ -224,6 +224,24 @@ p.gstin.toLowerCase().includes(query);
     return meesho || amazon || null;
   });
   readonly gstr1Summary = computed<Gstr1Summary | null>(() => {
+    const meesho = this.meeshoPayload();
+    const amazon = this.amazonPayload();
+    if (meesho && amazon) {
+      const ms = this.gstApi.calculateSummary(meesho);
+      const as = this.gstApi.calculateSummary(amazon);
+      const payload = this.gstr1Payload();
+      return {
+        totalTaxableValue: Math.round((ms.totalTaxableValue + as.totalTaxableValue) * 100) / 100,
+        totalIgst: Math.round((ms.totalIgst + as.totalIgst) * 100) / 100,
+        totalCgst: Math.round((ms.totalCgst + as.totalCgst) * 100) / 100,
+        totalSgst: Math.round((ms.totalSgst + as.totalSgst) * 100) / 100,
+        totalTax: Math.round((ms.totalTax + as.totalTax) * 100) / 100,
+        totalInvoices: ms.totalInvoices + as.totalInvoices,
+        totalCancelled: ms.totalCancelled + as.totalCancelled,
+        netInvoices: ms.netInvoices + as.netInvoices,
+        posCount: payload?.b2cs?.length || 0,
+      };
+    }
     const payload = this.gstr1Payload();
     if (!payload) return null;
     return this.gstApi.calculateSummary(payload);

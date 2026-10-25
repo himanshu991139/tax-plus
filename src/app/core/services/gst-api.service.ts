@@ -180,11 +180,11 @@ export class GstApiService {
         };
         if (b.sply_ty === 'INTRA') {
           const calculatedHalf = roundVal(b.txval * (rate / 200));
-          res.camt = Math.max(b.camt, calculatedHalf);
-          res.samt = Math.max(b.samt, calculatedHalf);
+          res.camt = b.camt !== 0 ? roundVal(b.camt) : calculatedHalf;
+          res.samt = b.samt !== 0 ? roundVal(b.samt) : calculatedHalf;
         } else {
           const calculatedTax = roundVal(b.txval * (rate / 100));
-          res.iamt = Math.max(b.iamt, calculatedTax);
+          res.iamt = b.iamt !== 0 ? roundVal(b.iamt) : calculatedTax;
         }
         res.csamt = 0;
         return res;

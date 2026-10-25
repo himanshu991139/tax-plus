@@ -40,6 +40,21 @@ export class StatementModalComponent {
   });
 
   readonly combinedSummary = computed<Gstr1Summary | null>(() => {
+    const ms = this.meeshoSummary();
+    const as = this.amazonSummary();
+    if (ms && as) {
+      return {
+        totalTaxableValue: Math.round((ms.totalTaxableValue + as.totalTaxableValue) * 100) / 100,
+        totalIgst: Math.round((ms.totalIgst + as.totalIgst) * 100) / 100,
+        totalCgst: Math.round((ms.totalCgst + as.totalCgst) * 100) / 100,
+        totalSgst: Math.round((ms.totalSgst + as.totalSgst) * 100) / 100,
+        totalTax: Math.round((ms.totalTax + as.totalTax) * 100) / 100,
+        totalInvoices: (ms.totalInvoices || 0) + (as.totalInvoices || 0),
+        totalCancelled: (ms.totalCancelled || 0) + (as.totalCancelled || 0),
+        netInvoices: (ms.netInvoices || 0) + (as.netInvoices || 0),
+        posCount: this.combinedPayload()?.b2cs?.length || 0,
+      };
+    }
     const p = this.combinedPayload();
     return p ? this.gstApi.calculateSummary(p) : null;
   });
@@ -53,9 +68,10 @@ export class StatementModalComponent {
   });
 
   readonly summary = computed<Gstr1Summary | null>(() => {
-    const payload = this.activePayload();
-    if (!payload) return null;
-    return this.gstApi.calculateSummary(payload);
+    const view = this.activeView();
+    if (view === 'meesho') return this.meeshoSummary();
+    if (view === 'amazon') return this.amazonSummary();
+    return this.combinedSummary();
   });
 
   setView(view: 'combined' | 'meesho' | 'amazon'): void {
