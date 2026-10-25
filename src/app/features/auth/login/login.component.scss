@@ -126,30 +126,68 @@ $font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   50%      { opacity: .6; transform: scale(.75); }
 }
 
-// Logo mark
-.logo-mark {
-  margin-bottom: 20px;
-  animation: fade-up .6s .1s ease both;
-}
-
-.logo-ring {
-  width: 68px;
-  height: 68px;
-  border-radius: 22px;
-  background: linear-gradient(135deg, rgba($blue,.25), rgba($violet,.25));
-  border: 1px solid rgba(255,255,255,.1);
+// Logo mark (original)
+.icon-area {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 40px rgba($blue,.2), 0 12px 28px rgba(0,0,0,.4);
-  backdrop-filter: blur(8px);
+  margin-bottom: 22px;
+  animation: fade-up .6s .1s ease both;
+}
 
-  .logo-icon {
-    width: 34px;
-    height: 34px;
-    color: $grad-a;
-    filter: drop-shadow(0 0 6px rgba($grad-a,.5));
-  }
+.icon-glow-dot {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.dot-bottom-left {
+  width: 14px;
+  height: 14px;
+  background: #10b981;
+  bottom: -4px;
+  left: -14px;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.7);
+}
+
+.dot-top-right {
+  width: 10px;
+  height: 10px;
+  background: #8b5cf6;
+  top: -6px;
+  right: -12px;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.7);
+}
+
+.icon-mark {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 30px rgba(56, 189, 248, 0.15), 0 8px 24px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+}
+
+.icon-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #059669, #10b981);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2);
+}
+
+.checkmark-svg {
+  width: 18px;
+  height: 18px;
+  color: #ffffff;
 }
 
 // Headline
