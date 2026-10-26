@@ -1,217 +1,334 @@
-<div class="landing-wrapper">
+<div class="lp-root">
 
-  <!-- ── Animated background ── -->
-  <div class="bg-layer" aria-hidden="true">
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-    <div class="grid-lines"></div>
-    <div class="noise"></div>
-  </div>
+  <!-- ═══════════════════════════════════════════════════════════════
+       HERO — split layout (left: value prop, right: login card)
+  ════════════════════════════════════════════════════════════════ -->
+  <section class="lp-hero">
 
-  <!-- ══════════════ HERO ══════════════ -->
-  <section class="hero">
-    <div class="hero-badge">
-      <span class="badge-dot"></span>
-      GST Filing · Made Simple
-    </div>
+    <!-- subtle decorative blobs -->
+    <div class="blob blob-1" aria-hidden="true"></div>
+    <div class="blob blob-2" aria-hidden="true"></div>
 
-    <div class="icon-area">
-      <div class="icon-glow-dot dot-bottom-left"></div>
-      <div class="icon-glow-dot dot-top-right"></div>
-      <div class="icon-mark">
-        <div class="icon-circle">
-          <svg viewBox="0 0 24 24" class="checkmark-svg" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 12.5l4 4 8-10" />
+    <!-- ── Left: value proposition ── -->
+    <div class="hero-left">
+      <!-- logo mark + wordmark -->
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+               stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12.5l4 4 8-10"/>
           </svg>
+        </div>
+        <span class="brand-name">MyEcom<strong>GST</strong></span>
+      </div>
+
+      <!-- pill badge -->
+      <span class="hero-pill">
+        <span class="pill-dot"></span>
+        GST Automation for E-commerce Sellers
+      </span>
+
+      <h1 class="hero-headline">
+        File GST Returns<br>
+        <span class="headline-accent">without the headache</span>
+      </h1>
+
+      <p class="hero-desc">
+        Upload your Meesho, Amazon or Flipkart sales report and get a
+        <strong>GSTR-1 ready JSON / Excel</strong> in seconds — no manual
+        data entry, no errors, no CA needed.
+      </p>
+
+      <!-- mini stats row -->
+      <div class="hero-stats">
+        <div class="hs-item">
+          <span class="hs-num">5+</span>
+          <span class="hs-label">Platforms</span>
+        </div>
+        <div class="hs-divider"></div>
+        <div class="hs-item">
+          <span class="hs-num">1-Click</span>
+          <span class="hs-label">GSTR-1 Export</span>
+        </div>
+        <div class="hs-divider"></div>
+        <div class="hs-item">
+          <span class="hs-num">100%</span>
+          <span class="hs-label">GST Compliant</span>
+        </div>
+      </div>
+
+      <!-- trust badges -->
+      <div class="trust-row">
+        <div class="trust-badge">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1.944L2 5.5v5c0 4.418 3.357 8.152 8 9.055 4.643-.903 8-4.637 8-9.055v-5L10 1.944zm-1.293 9.95L6.5 9.686l1.06-1.06 1.147 1.146L11.94 6.5l1.06 1.06-4.293 4.334z" clip-rule="evenodd"/></svg>
+          Secure &amp; Private
+        </div>
+        <div class="trust-badge">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+          Free to Start
+        </div>
+        <div class="trust-badge">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/></svg>
+          Instant Results
         </div>
       </div>
     </div>
 
-    <h1 class="hero-title">
-      MyEcom<span class="grad-text">GST</span>
-    </h1>
-
-    <p class="hero-sub">
-      Convert your Meesho, Amazon &amp; Flipkart sales reports
-      into <strong>GSTR-1 ready files</strong> — instantly.
-    </p>
-
-    <!-- CTA -->
-    <button class="cta-btn" (click)="signInWithGoogle()" [disabled]="isRedirecting()">
-      @if (isRedirecting()) {
-        <span class="btn-spin"></span>
-        <span>Redirecting…</span>
-      } @else {
-        <svg class="g-icon" viewBox="0 0 24 24">
-          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-        </svg>
-        <span>Continue with Google</span>
-      }
-    </button>
-
-    <p class="hero-note">Free to use · No credit card required</p>
-  </section>
-
-  <!-- ══════════════ STATS STRIP ══════════════ -->
-  <section class="stats-strip">
-    <div class="stat">
-      <span class="stat-num">5+</span>
-      <span class="stat-label">Platforms</span>
-    </div>
-    <div class="stat-sep"></div>
-    <div class="stat">
-      <span class="stat-num">1-Click</span>
-      <span class="stat-label">GSTR-1 Export</span>
-    </div>
-    <div class="stat-sep"></div>
-    <div class="stat">
-      <span class="stat-num">100%</span>
-      <span class="stat-label">GST Compliant</span>
-    </div>
-  </section>
-
-  <!-- ══════════════ HOW IT WORKS ══════════════ -->
-  <section class="section">
-    <p class="section-eyebrow">How it works</p>
-    <h2 class="section-title">Three steps to compliance</h2>
-
-    <div class="steps">
-      <div class="step">
-        <div class="step-icon step-icon-blue">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-          </svg>
+    <!-- ── Right: login card ── -->
+    <div class="hero-right">
+      <div class="login-card">
+        <!-- card header -->
+        <div class="lc-header">
+          <div class="lc-logo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12.5l4 4 8-10"/>
+            </svg>
+          </div>
+          <h2 class="lc-title">Welcome back</h2>
+          <p class="lc-sub">Sign in to your MyEcomGST account</p>
         </div>
-        <div class="step-content">
+
+        <!-- divider -->
+        <div class="lc-divider">
+          <span>continue with</span>
+        </div>
+
+        <!-- Google CTA -->
+        <button class="google-btn" (click)="signInWithGoogle()" [disabled]="isRedirecting()">
+          @if (isRedirecting()) {
+            <span class="g-spin"></span>
+            <span>Redirecting…</span>
+          } @else {
+            <svg class="g-logo" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <span>Sign in with Google</span>
+          }
+        </button>
+
+        <p class="lc-note">
+          By signing in you agree to our
+          <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+        </p>
+
+        <!-- feature checklist inside card -->
+        <div class="lc-features">
+          <div class="lcf-item">
+            <svg class="lcf-check" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="8" fill="#ecfdf5"/>
+              <path d="M4.5 8l2.5 2.5 4.5-5" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            No credit card required
+          </div>
+          <div class="lcf-item">
+            <svg class="lcf-check" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="8" fill="#ecfdf5"/>
+              <path d="M4.5 8l2.5 2.5 4.5-5" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Free GSTR-1 generation
+          </div>
+          <div class="lcf-item">
+            <svg class="lcf-check" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="8" fill="#ecfdf5"/>
+              <path d="M4.5 8l2.5 2.5 4.5-5" stroke="#10b981" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            All major marketplaces supported
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       HOW IT WORKS
+  ════════════════════════════════════════════════════════════════ -->
+  <section class="lp-section">
+    <div class="lp-container">
+      <div class="lp-eyebrow">How it works</div>
+      <h2 class="lp-section-title">Three steps to compliance</h2>
+      <p class="lp-section-sub">From raw marketplace export to GST-portal ready file in under 60 seconds.</p>
+
+      <div class="steps-row">
+        <div class="step-card">
+          <div class="sc-num">01</div>
+          <div class="sc-icon sc-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </div>
           <h3>Upload Reports</h3>
           <p>Drop your Excel / CSV files from Meesho, Amazon, Flipkart or any marketplace.</p>
         </div>
-        <span class="step-num">01</span>
-      </div>
 
-      <div class="step-connector"></div>
-
-      <div class="step">
-        <div class="step-icon step-icon-violet">
+        <div class="step-arrow">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
           </svg>
         </div>
-        <div class="step-content">
+
+        <div class="step-card">
+          <div class="sc-num">02</div>
+          <div class="sc-icon sc-violet">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+          </div>
           <h3>Auto Reconcile</h3>
-          <p>Our engine maps SKUs, HSN codes, taxes and returns across all channels instantly.</p>
+          <p>Our engine maps SKUs, HSN codes, taxes and returns across all channels.</p>
         </div>
-        <span class="step-num">02</span>
-      </div>
 
-      <div class="step-connector"></div>
-
-      <div class="step">
-        <div class="step-icon step-icon-emerald">
+        <div class="step-arrow">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+            <line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>
           </svg>
         </div>
-        <div class="step-content">
+
+        <div class="step-card">
+          <div class="sc-num">03</div>
+          <div class="sc-icon sc-emerald">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+          </div>
           <h3>Download GSTR-1</h3>
-          <p>Export a GST-portal ready JSON or Excel file — ready to file with zero manual edits.</p>
+          <p>Export GST-portal ready JSON or Excel — file with zero manual edits.</p>
         </div>
-        <span class="step-num">03</span>
       </div>
     </div>
   </section>
 
-  <!-- ══════════════ FEATURES ══════════════ -->
-  <section class="section">
-    <p class="section-eyebrow">Features</p>
-    <h2 class="section-title">Everything you need</h2>
+  <!-- ═══════════════════════════════════════════════════════════════
+       FEATURES
+  ════════════════════════════════════════════════════════════════ -->
+  <section class="lp-section lp-section-alt">
+    <div class="lp-container">
+      <div class="lp-eyebrow">Features</div>
+      <h2 class="lp-section-title">Everything you need, nothing you don't</h2>
 
-    <div class="feature-grid">
-      <div class="feature-card">
-        <div class="fc-icon fc-purple">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
-          </svg>
+      <div class="feat-grid">
+        <div class="feat-card">
+          <div class="feat-icon fi-purple">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+          </div>
+          <h4>Multi-Platform</h4>
+          <p>Meesho, Amazon, Flipkart, Myntra, AJIO &amp; more — all in one place.</p>
         </div>
-        <h4>Multi-Platform</h4>
-        <p>Meesho, Amazon, Flipkart, Myntra, AJIO &amp; more — all in one place.</p>
-      </div>
 
-      <div class="feature-card">
-        <div class="fc-icon fc-blue">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          </svg>
+        <div class="feat-card">
+          <div class="feat-icon fi-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+          <h4>Secure &amp; Private</h4>
+          <p>Your data never leaves your account. Encrypted in transit and at rest.</p>
         </div>
-        <h4>Secure &amp; Private</h4>
-        <p>Your data never leaves your account. Encrypted in transit and at rest.</p>
-      </div>
 
-      <div class="feature-card">
-        <div class="fc-icon fc-emerald">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-          </svg>
+        <div class="feat-card">
+          <div class="feat-icon fi-emerald">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <h4>Instant Results</h4>
+          <p>Process thousands of transactions in seconds, not hours.</p>
         </div>
-        <h4>Instant Results</h4>
-        <p>Process thousands of transactions in seconds, not hours.</p>
-      </div>
 
-      <div class="feature-card">
-        <div class="fc-icon fc-amber">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
-          </svg>
+        <div class="feat-card">
+          <div class="feat-icon fi-amber">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+          </div>
+          <h4>Smart Reports</h4>
+          <p>Visual dashboards to track sales, returns &amp; tax liability per period.</p>
         </div>
-        <h4>Smart Reports</h4>
-        <p>Visual dashboards to track sales, returns &amp; tax liability per period.</p>
+
+        <div class="feat-card">
+          <div class="feat-icon fi-indigo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+          </div>
+          <h4>HSN Auto-Map</h4>
+          <p>Automatically maps HSN codes from your product listings — no manual lookup.</p>
+        </div>
+
+        <div class="feat-card">
+          <div class="feat-icon fi-rose">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/>
+            </svg>
+          </div>
+          <h4>JSON &amp; Excel Export</h4>
+          <p>Get GST-portal compatible JSON or beautifully structured Excel outputs.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ══════════════ PLATFORMS ══════════════ -->
-  <section class="section">
-    <p class="section-eyebrow">Supported Platforms</p>
-    <div class="platform-pills">
-      <span class="platform-pill">🛍️ Meesho</span>
-      <span class="platform-pill">📦 Amazon</span>
-      <span class="platform-pill">🛒 Flipkart</span>
-      <span class="platform-pill">👗 Myntra</span>
-      <span class="platform-pill">🧵 AJIO</span>
-      <span class="platform-pill">📊 Direct CSV</span>
+  <!-- ═══════════════════════════════════════════════════════════════
+       PLATFORMS
+  ════════════════════════════════════════════════════════════════ -->
+  <section class="lp-section">
+    <div class="lp-container lp-container-narrow">
+      <div class="lp-eyebrow">Supported Platforms</div>
+      <h2 class="lp-section-title">Works with every major marketplace</h2>
+      <div class="platform-wrap">
+        <div class="plat-pill">🛍️ Meesho</div>
+        <div class="plat-pill">📦 Amazon</div>
+        <div class="plat-pill">🛒 Flipkart</div>
+        <div class="plat-pill">👗 Myntra</div>
+        <div class="plat-pill">🧵 AJIO</div>
+        <div class="plat-pill">📊 Direct CSV</div>
+      </div>
     </div>
   </section>
 
-  <!-- ══════════════ BOTTOM CTA ══════════════ -->
-  <section class="bottom-cta">
-    <div class="bottom-cta-card">
-      <div class="cta-glow"></div>
-      <h2>Ready to file smarter?</h2>
-      <p>Join sellers who save hours every quarter on GST compliance.</p>
-      <button class="cta-btn cta-btn-lg" (click)="signInWithGoogle()" [disabled]="isRedirecting()">
+  <!-- ═══════════════════════════════════════════════════════════════
+       BOTTOM CTA BAND
+  ════════════════════════════════════════════════════════════════ -->
+  <section class="lp-cta-band">
+    <div class="lp-container lp-container-narrow">
+      <h2 class="cta-band-title">Ready to file smarter?</h2>
+      <p class="cta-band-sub">Join e-commerce sellers who save hours every quarter on GST compliance.</p>
+      <button class="cta-band-btn" (click)="signInWithGoogle()" [disabled]="isRedirecting()">
         @if (isRedirecting()) {
-          <span class="btn-spin btn-spin-dark"></span>
+          <span class="g-spin g-spin-white"></span>
           <span>Redirecting…</span>
         } @else {
-          <svg class="g-icon" viewBox="0 0 24 24">
+          <svg class="g-logo" viewBox="0 0 24 24">
             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
           </svg>
-          <span>Get Started Free</span>
+          <span>Get Started — It's Free</span>
         }
       </button>
+      <p class="cta-band-note">No credit card · Instant setup · Cancel anytime</p>
     </div>
   </section>
 
-  <!-- ══════════════ FOOTER ══════════════ -->
-  <footer class="landing-footer">
-    <p>© 2026 MyEcomGST · All rights reserved</p>
+  <!-- ═══════════════════════════════════════════════════════════════
+       FOOTER
+  ════════════════════════════════════════════════════════════════ -->
+  <footer class="lp-footer">
+    <div class="lp-container lp-footer-inner">
+      <span class="footer-brand">MyEcom<strong>GST</strong></span>
+      <span class="footer-copy">© 2026 MyEcomGST · All rights reserved</span>
+      <div class="footer-links">
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+        <a href="#">Contact</a>
+      </div>
+    </div>
   </footer>
 
 </div>
