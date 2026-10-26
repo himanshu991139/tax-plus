@@ -126,14 +126,36 @@ export class UploadModalComponent {
         return;
       }
 
+      // Check month match asynchronously
+      if (type !== 'amazonMtr') {
+        const activeMonth = this.isQuarterly() ? this.currentActiveMonth() : null;
+        const expectedMonth = activeMonth
+          ? parseInt(activeMonth.periodCode.substring(0, 2), 10)
+          : parseInt(this.effectivePeriodCode().substring(0, 2), 10);
+        const expectedMonthName = activeMonth
+          ? activeMonth.monthName
+          : this.getMonthName(expectedMonth);
+
+        this.validateFileMonth(file, expectedMonth, expectedMonthName).then((err) => {
+          if (err) {
+            this.errorMessage.set(err);
+            input.value = '';
+            if (type === 'sales') this.salesFile.set(null);
+            else if (type === 'return') this.returnFile.set(null);
+            else if (type === 'invoice') this.invoiceFile.set(null);
+          } else {
+            this.errorMessage.set(null);
+            if (type === 'sales') this.salesFile.set(file);
+            else if (type === 'return') this.returnFile.set(file);
+            else if (type === 'invoice') this.invoiceFile.set(file);
+          }
+        });
+        return;
+      }
+
       if (type === 'amazonMtr') {
         this.errorMessage.set(null);
         this.amazonMtrFile.set(file);
-      } else {
-        this.errorMessage.set(null);
-        if (type === 'sales') this.salesFile.set(file);
-        else if (type === 'return') this.returnFile.set(file);
-        else if (type === 'invoice') this.invoiceFile.set(file);
       }
     }
   }
@@ -146,7 +168,7 @@ export class UploadModalComponent {
     }
   }
 
-  private submitMeeshoConversion(): void {
+  private async submitMeeshoConversion(): Promise<void> {
     const sales = this.salesFile();
     const returnF = this.returnFile();
     const invoiceF = this.invoiceFile();
@@ -154,6 +176,23 @@ export class UploadModalComponent {
     if (!sales || !returnF || !invoiceF) {
       this.errorMessage.set('All 3 reports (TCS Sales, TCS Sales Return, and Tax Invoice Details) are required.');
       return;
+    }
+
+    const activeMonth = this.isQuarterly() ? this.currentActiveMonth() : null;
+    const expectedMonth = activeMonth
+      ? parseInt(activeMonth.periodCode.substring(0, 2), 10)
+      : parseInt(this.effectivePeriodCode().substring(0, 2), 10);
+    const expectedMonthName = activeMonth
+      ? activeMonth.monthName
+      : this.getMonthName(expectedMonth);
+
+    // Validate all files for month consistency
+    for (const f of [sales, returnF, invoiceF]) {
+      const err = await this.validateFileMonth(f, expectedMonth, expectedMonthName);
+      if (err) {
+        this.errorMessage.set(err);
+        return;
+      }
     }
 
     this.isSubmitting.set(true);
@@ -188,7 +227,8 @@ export class UploadModalComponent {
           this.state.setQuarterMonthPayload(platformId, period, payload);
           const monthName = this.currentActiveMonth().monthName;
           this.state.showToast(`${monthName} reports uploaded and consolidated into Quarterly return!`, 'success');
-          this.resetFiles();
+          // Do NOT reset files here in quarterly mode so the selected file labels remain visible.
+          // Files are cleared automatically when the user switches to a different month tab.
         } else {
           this.state.setGstr1Payload(payload);
           this.state.showToast('Meesho reports submitted successfully! View Statement and Generate & Download GSTR-1 are now available.', 'success');
@@ -241,7 +281,8 @@ export class UploadModalComponent {
           this.state.setQuarterMonthPayload(platformId, period, payload);
           const monthName = this.currentActiveMonth().monthName;
           this.state.showToast(`${monthName} Amazon MTR uploaded and consolidated into Quarterly return!`, 'success');
-          this.resetFiles();
+          // Do NOT reset files here in quarterly mode so the selected file labels remain visible.
+          // Files are cleared automatically when the user switches to a different month tab.
         } else {
           this.state.setGstr1Payload(payload);
           this.state.showToast('Amazon MTR report submitted successfully! View Statement and Generate & Download GSTR-1 are now available.', 'success');
@@ -277,5 +318,100 @@ export class UploadModalComponent {
     const sizes = ['Bytes', 'KB', 'MB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+  }
+
+  private getMonthName(m: number): string {
+    const names = [
+      '',
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    return names[m] || `month ${m}`;
+  }
+
+  private async validateFileMonth(file: File, expectedMonth: number, expectedMonthName: string): Promise<string | null> {
+    try {
+      const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+
+      if (ext === '.csv') {
+        const text = await file.text();
+        const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+        if (lines.length < 2) return null;
+
+        const headers = lines[0]
+          .split(',')
+          .map((h) => h.trim().replace(/^["']|["']$/g, '').toLowerCase().replace(/[^a-z0-9]/g, '_'));
+
+        const monthCol = headers.findIndex((h) => h === 'month_number' || h === 'month' || h.includes('month_num'));
+        const dateCol = headers.findIndex((h) => h.includes('order_date') || h.includes('invoice_date') || h.includes('date'));
+
+        for (let i = 1; i < Math.min(lines.length, 100); i++) {
+          const cols = lines[i].split(',').map((c) => c.trim().replace(/^["']|["']$/g, ''));
+          if (monthCol !== -1 && cols[monthCol]) {
+            const m = parseInt(cols[monthCol], 10);
+            if (!isNaN(m) && m !== expectedMonth) {
+              const foundName = this.getMonthName(m);
+              return `Filing month mismatch in '${file.name}': expected ${expectedMonthName} (month ${expectedMonth}), but found month_number ${m} (${foundName}). Please verify that the report matches the selected tax period.`;
+            }
+          } else if (dateCol !== -1 && cols[dateCol]) {
+            const match = cols[dateCol].match(/(\d{4})-(\d{2})-\d{2}/);
+            if (match) {
+              const m = parseInt(match[2], 10);
+              if (!isNaN(m) && m !== expectedMonth) {
+                const foundName = this.getMonthName(m);
+                return `Filing month mismatch in '${file.name}': expected ${expectedMonthName} (month ${expectedMonth}), but found date with month ${m} (${foundName}). Please verify that the report matches the selected tax period.`;
+              }
+            }
+          }
+        }
+      } else if (ext === '.xlsx' || ext === '.xls') {
+        const XLSX = await import('xlsx');
+        const buffer = await file.arrayBuffer();
+        const wb = XLSX.read(buffer, { type: 'array', sheetRows: 100 });
+        if (!wb.SheetNames || wb.SheetNames.length === 0) return null;
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        const json: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1, blankrows: false });
+        if (json.length < 2) return null;
+
+        const headers = (json[0] || []).map((h) => String(h || '').trim().toLowerCase().replace(/[^a-z0-9]/g, '_'));
+        const monthCol = headers.findIndex((h) => h === 'month_number' || h === 'month' || h.includes('month_num'));
+        const dateCol = headers.findIndex((h) => h.includes('order_date') || h.includes('invoice_date') || h.includes('date'));
+
+        for (let i = 1; i < json.length; i++) {
+          const row = json[i];
+          if (!row || row.length === 0) continue;
+          if (monthCol !== -1 && row[monthCol] !== undefined && row[monthCol] !== null && String(row[monthCol]).trim() !== '') {
+            const m = parseInt(String(row[monthCol]).trim(), 10);
+            if (!isNaN(m) && m !== expectedMonth) {
+              const foundName = this.getMonthName(m);
+              return `Filing month mismatch in '${file.name}': expected ${expectedMonthName} (month ${expectedMonth}), but found month_number ${m} (${foundName}). Please verify that the report matches the selected tax period.`;
+            }
+          } else if (dateCol !== -1 && row[dateCol]) {
+            const val = String(row[dateCol]).trim();
+            const match = val.match(/(\d{4})-(\d{2})-\d{2}/);
+            if (match) {
+              const m = parseInt(match[2], 10);
+              if (!isNaN(m) && m !== expectedMonth) {
+                const foundName = this.getMonthName(m);
+                return `Filing month mismatch in '${file.name}': expected ${expectedMonthName} (month ${expectedMonth}), but found date with month ${m} (${foundName}). Please verify that the report matches the selected tax period.`;
+              }
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('File month validation warning:', err);
+    }
+    return null;
   }
 }

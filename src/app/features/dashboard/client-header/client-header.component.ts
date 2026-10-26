@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { ClientStateService } from '../../../core/services/client-state.service';
 import { GstApiService } from '../../../core/services/gst-api.service';
 import { IconComponent } from '../../../shared/components/icon/icon.component';
+import { getQuarterMonths } from '../../../core/models/client-info.model';
 
 @Component({
   selector: 'app-client-header',
@@ -51,6 +52,22 @@ export class ClientHeaderComponent {
     const y = this.selectedYear();
     const num = parseInt(y, 10);
     return isNaN(num) ? y : `FY ${num}-${String(num + 1).substring(2)}`;
+  });
+
+  /**
+   * For Quarterly filing: all 3 months of the active quarter must be uploaded
+   * before "View Statement" and "Generate GSTR-1" are enabled.
+   * For Monthly filing: just having a payload is sufficient.
+   */
+  readonly canViewStatementOrGenerate = computed(() => {
+    if (!this.isQuarterly()) {
+      return this.state.gstr1Payload() !== null;
+    }
+    // Quarterly: require all 3 months uploaded for the selected platform
+    const c = this.state.clientInfo();
+    const months = getQuarterMonths(c.quarter || 'Q2', c.financialYear || '2026-2027');
+    const platformId = this.state.selectedPlatform()?.id || 'meesho-b2c';
+    return months.every((m) => this.state.isQuarterMonthUploaded(platformId, m.periodCode));
   });
 
   downloadGstr1(): void {

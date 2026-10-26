@@ -118,11 +118,16 @@
                       <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event, 'amazonMtr')" />
                       <span>Choose file</span>
                     </label>
-                    <span class="file-row-status" [class.has-file]="amazonMtrFile()">
+                    <span class="file-row-status" [class.has-file]="amazonMtrFile() || (isQuarterly() && isMonthUploaded(currentActiveMonth().periodCode))">
                       @if (amazonMtrFile(); as f) {
                         <span class="text-success d-inline-flex align-items-center gap-1">
                           <app-icon name="check-circle" [size]="14"></app-icon>
                           <span class="file-name-text">{{ f.name }} ({{ formatBytes(f.size) }})</span>
+                        </span>
+                      } @else if (isQuarterly() && isMonthUploaded(currentActiveMonth().periodCode)) {
+                        <span class="text-success d-inline-flex align-items-center gap-1">
+                          <app-icon name="check-circle" [size]="14"></app-icon>
+                          <span class="file-name-text">Uploaded for {{ currentActiveMonth().monthName }}</span>
                         </span>
                       } @else {
                         <span class="text-muted">No file chosen</span>
@@ -141,11 +146,16 @@
                       <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event, 'sales')" />
                       <span>Choose file</span>
                     </label>
-                    <span class="file-row-status" [class.has-file]="salesFile()">
+                    <span class="file-row-status" [class.has-file]="salesFile() || (isQuarterly() && isMonthUploaded(currentActiveMonth().periodCode))">
                       @if (salesFile(); as f) {
                         <span class="text-success d-inline-flex align-items-center gap-1">
                           <app-icon name="check-circle" [size]="14"></app-icon>
                           <span class="file-name-text">{{ f.name }} ({{ formatBytes(f.size) }})</span>
+                        </span>
+                      } @else if (isQuarterly() && isMonthUploaded(currentActiveMonth().periodCode)) {
+                        <span class="text-success d-inline-flex align-items-center gap-1">
+                          <app-icon name="check-circle" [size]="14"></app-icon>
+                          <span class="file-name-text">Uploaded for {{ currentActiveMonth().monthName }}</span>
                         </span>
                       } @else {
                         <span class="text-muted">No file chosen</span>
@@ -163,11 +173,16 @@
                       <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event, 'return')" />
                       <span>Choose file</span>
                     </label>
-                    <span class="file-row-status" [class.has-file]="returnFile()">
+                    <span class="file-row-status" [class.has-file]="returnFile() || (isQuarterly() && isMonthUploaded(currentActiveMonth().periodCode))">
                       @if (returnFile(); as f) {
                         <span class="text-success d-inline-flex align-items-center gap-1">
                           <app-icon name="check-circle" [size]="14"></app-icon>
                           <span class="file-name-text">{{ f.name }} ({{ formatBytes(f.size) }})</span>
+                        </span>
+                      } @else if (isQuarterly() && isMonthUploaded(currentActiveMonth().periodCode)) {
+                        <span class="text-success d-inline-flex align-items-center gap-1">
+                          <app-icon name="check-circle" [size]="14"></app-icon>
+                          <span class="file-name-text">Uploaded for {{ currentActiveMonth().monthName }}</span>
                         </span>
                       } @else {
                         <span class="text-muted">No file chosen</span>
@@ -185,11 +200,16 @@
                       <input type="file" accept=".xlsx,.xls,.csv" (change)="onFileSelected($event, 'invoice')" />
                       <span>Choose file</span>
                     </label>
-                    <span class="file-row-status" [class.has-file]="invoiceFile()">
+                    <span class="file-row-status" [class.has-file]="invoiceFile() || (isQuarterly() && isMonthUploaded(currentActiveMonth().periodCode))">
                       @if (invoiceFile(); as f) {
                         <span class="text-success d-inline-flex align-items-center gap-1">
                           <app-icon name="check-circle" [size]="14"></app-icon>
                           <span class="file-name-text">{{ f.name }} ({{ formatBytes(f.size) }})</span>
+                        </span>
+                      } @else if (isQuarterly() && isMonthUploaded(currentActiveMonth().periodCode)) {
+                        <span class="text-success d-inline-flex align-items-center gap-1">
+                          <app-icon name="check-circle" [size]="14"></app-icon>
+                          <span class="file-name-text">Uploaded for {{ currentActiveMonth().monthName }}</span>
                         </span>
                       } @else {
                         <span class="text-muted">No file chosen</span>

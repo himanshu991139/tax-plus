@@ -138,6 +138,8 @@
           type="button"
           class="btn-view-statement"
           (click)="state.openStatementModal()"
+          [disabled]="!state.gstr1Payload()"
+          [title]="state.gstr1Payload() ? 'View GST Statement' : 'Submit platform data first'"
         >
           <app-icon name="file-text" [size]="15"></app-icon>
           <span>View Statement</span>
@@ -150,8 +152,8 @@
           type="button"
           class="btn-download-gstr1"
           (click)="downloadGstr1()"
-          [disabled]="!state.gstr1Payload()"
-          [title]="state.gstr1Payload() ? 'Download generated GSTR-1 JSON' : 'Submit platform data first to enable GSTR-1 download'"
+          [disabled]="!canViewStatementOrGenerate()"
+          [title]="canViewStatementOrGenerate() ? 'Download generated GSTR-1 JSON' : (isQuarterly() ? 'Upload all 3 months to generate GSTR-1' : 'Submit platform data first to enable GSTR-1 download')"
         >
           <app-icon name="download" [size]="15"></app-icon>
           <span>Generate &amp; Download GSTR-1</span>
